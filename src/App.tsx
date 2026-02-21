@@ -1,0 +1,115 @@
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { Navbar } from './components/Navbar';
+import { presentations } from './presentations';
+
+// Главная страница
+const Home: React.FC = () => (
+  <div style={styles.home}>
+    <h1 style={styles.title}>Выберите презентацию</h1>
+    <div style={styles.grid}>
+      {presentations.map((p) => (
+        <a key={p.id} href={`/presentation/${p.id}`} style={styles.card}>
+          <h3>{p.title}</h3>
+          <p>{p.description}</p>
+          <span style={styles.startBtn}>Начать →</span>
+        </a>
+      ))}
+    </div>
+  </div>
+);
+
+// Компонент для загрузки презентации с использованием useParams
+const PresentationRoute: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  
+  if (!id) {
+    return <div style={styles.error}>ID презентации не указан</div>;
+  }
+
+  const presentation = presentations.find((p) => p.id === id);
+
+  if (!presentation) {
+    return (
+      <div style={styles.error}>
+        <h2>Презентация не найдена</h2>
+        <p>ID: {id}</p>
+        <p>Доступные презентации:</p>
+        <ul>
+          {presentations.map((p) => (
+            <li key={p.id}>{p.id} - {p.title}</li>
+          ))}
+        </ul>
+        <a href="/" style={styles.backLink}>← На главную</a>
+      </div>
+    );
+  }
+
+  const PresentationComponent = presentation.component;
+
+  return (
+    <React.Suspense fallback={<div style={styles.loader}>Загрузка презентации...</div>}>
+      <PresentationComponent />
+    </React.Suspense>
+  );
+};
+
+export const App: React.FC = () => (
+  <BrowserRouter>
+    <div style={styles.app}>
+      <Navbar />
+      <main style={styles.main}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/presentation/:id" element={<PresentationRoute />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+    </div>
+  </BrowserRouter>
+);
+
+const styles: { [key: string]: React.CSSProperties } = {
+  app: { minHeight: '100vh', backgroundColor: '#0f0f1a' },
+  main: { paddingTop: '80px' },
+  home: { padding: '4rem 2rem', maxWidth: '1200px', margin: '0 auto' },
+  title: { color: '#fff', textAlign: 'center', marginBottom: '3rem' },
+  grid: { 
+    display: 'grid', 
+    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+    gap: '2rem' 
+  },
+  card: {
+    backgroundColor: '#1a1a2e',
+    padding: '2rem',
+    borderRadius: '10px',
+    color: '#fff',
+    textDecoration: 'none',
+    transition: 'transform 0.3s',
+    display: 'block',
+    cursor: 'pointer'
+  },
+  startBtn: { 
+    color: '#4ecdc4', 
+    fontWeight: 'bold', 
+    marginTop: '1rem', 
+    display: 'inline-block' 
+  },
+  loader: { 
+    color: '#fff', 
+    textAlign: 'center', 
+    marginTop: '4rem', 
+    fontSize: '1.5rem' 
+  },
+  error: {
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: '4rem',
+    padding: '2rem'
+  },
+  backLink: {
+    color: '#4ecdc4',
+    marginTop: '2rem',
+    display: 'inline-block'
+  }
+};

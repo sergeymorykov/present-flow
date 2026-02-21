@@ -7,10 +7,17 @@ module.exports = {
   entry: './src/index.tsx',
   output: {
     path: path.join(__dirname, '/dist'),
-    filename: 'app.bundle.js'
+    filename: 'app.bundle.js',
+    clean: true,
+    publicPath: '/'
   },
   devServer: {
-    port: 3000
+    port: 3000,
+    static: path.join(__dirname, 'dist'),
+    hot: true,
+    open: true,
+    historyApiFallback: true,
+    compress: true
   },
   module: {
     rules: [
@@ -19,6 +26,9 @@ module.exports = {
       { test: /\.css$/, use: ['style-loader', 'css-loader'] },
       { test: /\.md$/, use: [require.resolve('raw-loader')] }
     ]
+  },
+  resolve: {
+    extensions: ['.js', '.jsx', '.ts', '.tsx'],
   },
   plugins: [
     new HtmlWebpackPlugin({ template: './index.html' }),
