@@ -1,0 +1,15 @@
+.slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 2rem;
+}
+
+.title {
+  font-size: 2.4rem;
+  font-weight: 600;
+  color: #a0e0ff;
+  border-bottom: 3px solid #00d9ff;
+  padding-bottom: 0.75rem;
+}

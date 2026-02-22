@@ -1,0 +1,28 @@
+.slide {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 100%;
+  padding: 2rem;
+}
+
+.title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #00d9ff;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.author {
+  font-size: 1.4rem;
+  color: #c0c0e0;
+  margin-bottom: 0.5rem;
+}
+
+.date {
+  font-size: 1rem;
+  color: #7070a0;
+}

@@ -1,8 +1,12 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { presentations } from './presentations';
 import { Footer } from './components/Footer';
+
+const EditorPageLazy = lazy(() =>
+  import('./pages/EditorPage').then((m) => ({ default: m.EditorPage }))
+);
 
 // Главная страница
 const Home: React.FC = () => (
@@ -62,6 +66,14 @@ export const App: React.FC = () => (
       <main style={styles.main}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route
+            path="/editor"
+            element={
+              <Suspense fallback={<div style={styles.loader}>Загрузка редактора...</div>}>
+                <EditorPageLazy />
+              </Suspense>
+            }
+          />
           <Route path="/presentation/:id" element={<PresentationRoute />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

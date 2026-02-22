@@ -1,0 +1,27 @@
+.slide {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 2rem;
+  text-align: center;
+}
+
+.title {
+  font-size: 1.8rem;
+  color: #f87171;
+  margin-bottom: 1rem;
+}
+
+.message {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 0.95rem;
+  color: #fca5a5;
+  background: #1a0a0a;
+  border: 1px solid #7f1d1d;
+  border-radius: 6px;
+  padding: 1rem 1.5rem;
+  max-width: 600px;
+  white-space: pre-wrap;
+}

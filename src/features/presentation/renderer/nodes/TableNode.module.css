@@ -1,0 +1,38 @@
+.wrapper {
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #e0e0f0;
+  font-size: 0.95rem;
+}
+
+.table th,
+.table td {
+  border: 1px solid #3a3a5c;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.table th {
+  background: #1a1a3a;
+  color: #a0c0ff;
+  font-weight: 600;
+}
+
+.table tr:nth-child(even) {
+  background: #12122a;
+}
+
+.noBorder th,
+.noBorder td {
+  border: none;
+}
+
+.noBorder th {
+  background: transparent;
+  color: #00d9ff;
+}

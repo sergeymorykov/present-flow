@@ -1,0 +1,108 @@
+.viewer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #0f0f1a;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  outline: none;
+}
+
+.slideArea {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated slide wrapper — key change triggers CSS animation */
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  animation: slideIn 0.25s ease forwards;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.controls {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: rgba(26, 26, 46, 0.95);
+  border-top: 1px solid #2a2a4a;
+}
+
+.navButton {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #3a3a5c;
+  border-radius: 6px;
+  background: #1a1a2e;
+  color: #e0e0f0;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+  padding: 0;
+}
+
+.navButton:hover:not(:disabled) {
+  background: #2a2a4e;
+  border-color: #00d9ff;
+  color: #00d9ff;
+}
+
+.navButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.counter {
+  font-size: 0.88rem;
+  color: #aaaacc;
+  min-width: 64px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.progressBar {
+  height: 2px;
+  background: #2a2a4a;
+  flex-shrink: 0;
+}
+
+.progressFill {
+  height: 100%;
+  background: #00d9ff;
+  width: var(--progress, 0%);
+  transition: width 0.25s ease;
+}
+
+.emptyState {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555577;
+  font-size: 1.1rem;
+}

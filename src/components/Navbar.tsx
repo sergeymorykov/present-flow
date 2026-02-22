@@ -15,6 +15,9 @@ export const Navbar: React.FC = () => {
 
         {!isPresentationMode && (
           <div style={styles.menu}>
+            <Link to="/editor" style={styles.editorLink}>
+              Редактор
+            </Link>
             {presentations.map((p) => (
               <Link key={p.id} to={`/presentation/${p.id}`} style={styles.link}>
                 {p.title}
@@ -71,5 +74,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#4ecdc4',
     textDecoration: 'none',
     fontWeight: 'bold'
+  },
+  editorLink: {
+    color: '#00d9ff',
+    textDecoration: 'none',
+    fontWeight: 'bold',
+    borderBottom: '2px solid #00d9ff',
+    paddingBottom: '2px'
   }
 };

@@ -14,5 +14,14 @@ export const presentations: PresentationConfig[] = [
     description: 'Презентация о полиморфизме в языке C++ с примерами и объяснениями.',
     component: lazy(() => import('./PresentationPolymorphism')),
   },
-  // Добавляйте новые презентации сюда
+  {
+    id: 'polymorphism-markdown',
+    title: 'Полиморфизм в C++ (Markdown)',
+    description: 'Reveal.js презентация из markdown-файла с вертикальными слайдами, LaTeX и Live Code.',
+    component: lazy(() =>
+      import('./PresentationMarkdown').then((m) => ({
+        default: m.PresentationMarkdown,
+      }))
+    ),
+  },
 ];
