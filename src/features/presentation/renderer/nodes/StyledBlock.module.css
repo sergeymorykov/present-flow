@@ -1,0 +1,10 @@
+.wrapper {
+  display: block;
+}
+
+/* Заставляем прямых потомков наследовать text-align и font-size от обёртки,
+   иначе их собственные классы (.text и др.) переопределяют значения */
+.wrapper > * {
+  text-align: inherit !important;
+  font-size: inherit !important;
+}

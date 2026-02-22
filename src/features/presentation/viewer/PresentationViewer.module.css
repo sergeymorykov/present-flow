@@ -13,6 +13,18 @@
   flex: 1;
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slideScaled {
+  width: 960px;
+  height: 540px;
+  flex-shrink: 0;
+  transform: scale(var(--scale, 1));
+  transform-origin: center center;
+  position: relative;
 }
 
 /* Animated slide wrapper — key change triggers CSS animation */

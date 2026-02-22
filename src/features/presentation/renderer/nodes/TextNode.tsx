@@ -22,7 +22,7 @@ export const TextNode: React.FC<Props> = ({ node }) => {
   );
 
   return (
-    <div className={styles.text}>
+    <div className={styles.text} data-list-style={node.listClass ?? undefined}>
       <ReactMarkdown
         remarkPlugins={[remarkMath]}
         rehypePlugins={[rehypeKatex]}

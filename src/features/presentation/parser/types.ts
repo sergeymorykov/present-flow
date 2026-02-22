@@ -1,3 +1,12 @@
+export type BlockStyle = {
+  textAlign?: 'left' | 'center' | 'right';
+  marginTop?: string;
+  marginRight?: string;
+  marginBottom?: string;
+  marginLeft?: string;
+  fontSize?: string;
+};
+
 export type TitleSlide = {
   type: 'title';
   title: string;
@@ -5,16 +14,20 @@ export type TitleSlide = {
   author?: string;
   affiliation?: string;
   date?: string;
+  style?: BlockStyle;
 };
 
 export type SectionSlide = {
   type: 'section';
   title: string;
+  style?: BlockStyle;
 };
 
 export type TextNode = {
   type: 'text';
   content: string;
+  /** Класс для списков: disc | circle | square | decimal | decimal-leading-zero | lower-alpha | upper-alpha */
+  listClass?: string;
 };
 
 export type ImageNode = {
@@ -49,13 +62,20 @@ export type ColumnsNode = {
   columns: string[];
 };
 
+export type StyledBlockNode = {
+  type: 'styled';
+  style?: BlockStyle;
+  children: SlideNode[];
+};
+
 export type SlideNode =
   | TextNode
   | ImageNode
   | CodeNode
   | TableNode
   | FragmentNode
-  | ColumnsNode;
+  | ColumnsNode
+  | StyledBlockNode;
 
 export type ContentSlide = {
   type: 'content';

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef, useMemo } from 'react';
-import { Slide } from '../parser/types';
+import { Slide, SlideNode } from '../parser/types';
 import { TitleSlide } from '../renderer/nodes/TitleSlide';
 import { SectionSlide } from '../renderer/nodes/SectionSlide';
 import { ContentSlide } from '../renderer/nodes/ContentSlide';
@@ -8,9 +8,16 @@ import styles from './PresentationViewer.module.css';
 
 type Props = { slides: Slide[] };
 
+const countFragmentsInNodes = (nodes: SlideNode[]): number =>
+  nodes.reduce((sum, n) => {
+    if (n.type === 'fragment') return sum + 1;
+    if (n.type === 'styled') return sum + countFragmentsInNodes(n.children);
+    return sum;
+  }, 0);
+
 const countFragments = (slide: Slide): number => {
   if (slide.type !== 'content') return 0;
-  return slide.nodes.filter((n) => n.type === 'fragment').length;
+  return countFragmentsInNodes(slide.nodes);
 };
 
 const renderSlide = (slide: Slide, visibleFragments: number): React.ReactElement => {
@@ -21,17 +28,35 @@ const renderSlide = (slide: Slide, visibleFragments: number): React.ReactElement
   return <></>;
 };
 
+const DESIGN_WIDTH = 960;
+const DESIGN_HEIGHT = 540;
+
 export const PresentationViewer: React.FC<Props> = ({ slides }) => {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [visibleFragments, setVisibleFragments] = useState<number>(0);
+  const [scale, setScale] = useState<number>(1);
   const viewerRef = useRef<HTMLDivElement | null>(null);
   const progressRef = useRef<HTMLDivElement | null>(null);
+  const slideAreaRef = useRef<HTMLDivElement | null>(null);
 
-  // Reset to first slide when slide list changes significantly
   useEffect(() => {
     setCurrentIndex((prev) => Math.min(prev, Math.max(0, slides.length - 1)));
     setVisibleFragments(0);
   }, [slides.length]);
+
+  useEffect(() => {
+    const el = slideAreaRef.current;
+    if (!el) return;
+    const updateScale = (): void => {
+      const w = el.clientWidth;
+      const h = el.clientHeight;
+      setScale(Math.min(w / DESIGN_WIDTH, h / DESIGN_HEIGHT, 2) || 1);
+    };
+    updateScale();
+    const ro = new ResizeObserver(updateScale);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const currentSlide = slides[currentIndex];
   const totalFragments = currentSlide ? countFragments(currentSlide) : 0;
@@ -111,10 +136,11 @@ export const PresentationViewer: React.FC<Props> = ({ slides }) => {
         <div ref={progressRef} className={styles.progressFill} />
       </div>
 
-      <div className={styles.slideArea}>
-        {/* key forces remount + CSS animation on every slide change */}
-        <div key={currentIndex} className={styles.slide}>
-          {renderSlide(currentSlide, visibleFragments)}
+      <div ref={slideAreaRef} className={styles.slideArea} style={{ ['--scale' as string]: scale }}>
+        <div className={styles.slideScaled}>
+          <div key={currentIndex} className={styles.slide}>
+            {renderSlide(currentSlide, visibleFragments)}
+          </div>
         </div>
       </div>
 

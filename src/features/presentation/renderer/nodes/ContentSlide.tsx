@@ -2,6 +2,7 @@ import React from 'react';
 import { ContentSlide as ContentSlideType } from '../../parser/types';
 import { NodeRenderer } from '../NodeRenderer';
 import { FragmentNode } from './FragmentNode';
+import { StyledBlock } from './StyledBlock';
 import styles from './ContentSlide.module.css';
 
 type Props = {
@@ -10,15 +11,25 @@ type Props = {
 };
 
 export const ContentSlide: React.FC<Props> = ({ slide, visibleFragments }) => {
-  let fragmentsSeen = 0;
+  const fragmentCounter = { current: 0 };
 
   return (
     <div className={styles.slide}>
       {slide.nodes.map((node, i) => {
         if (node.type === 'fragment') {
-          const isVisible = fragmentsSeen < visibleFragments;
-          fragmentsSeen += 1;
+          const isVisible = fragmentCounter.current < visibleFragments;
+          fragmentCounter.current += 1;
           return <FragmentNode key={i} node={node} visible={isVisible} />;
+        }
+        if (node.type === 'styled') {
+          return (
+            <StyledBlock
+              key={i}
+              node={node}
+              visibleFragments={visibleFragments}
+              fragmentCounter={fragmentCounter}
+            />
+          );
         }
         return <NodeRenderer key={i} node={node} />;
       })}
