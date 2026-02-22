@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { presentations } from './presentations';
+import { Footer } from './components/Footer';
 
 // Главная страница
 const Home: React.FC = () => (
@@ -65,13 +66,19 @@ export const App: React.FC = () => (
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+      <Footer />
     </div>
   </BrowserRouter>
 );
 
 const styles: { [key: string]: React.CSSProperties } = {
   app: { minHeight: '100vh', backgroundColor: '#0f0f1a' },
-  main: { paddingTop: '80px' },
+  main: { 
+    paddingTop: '80px',
+    paddingBottom: '60px',
+    flex: 1,
+    width: '100%'
+  },
   home: { padding: '4rem 2rem', maxWidth: '1200px', margin: '0 auto' },
   title: { color: '#fff', textAlign: 'center', marginBottom: '3rem' },
   grid: { 
