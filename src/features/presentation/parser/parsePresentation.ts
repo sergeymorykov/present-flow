@@ -6,6 +6,7 @@ import {
   SlideNode,
   TextNode,
   ImageNode,
+  VideoNode,
   CodeNode,
   TableNode,
   FragmentNode,
@@ -30,6 +31,13 @@ const parseImageDirective = (line: string): ImageNode => {
   }
 
   return node;
+};
+
+const parseVideoDirective = (line: string): VideoNode => {
+  const parts = line.slice('@video'.length).trim().split(/\s+/);
+  const src = parts[0] ?? '';
+  const fullSlide = parts.slice(1).some((p) => p.toLowerCase() === 'fullslide');
+  return { type: 'video', src, ...(fullSlide && { fullSlide: true }) };
 };
 
 const RESERVED_CODE_TOKENS = new Set(['editable']);
@@ -191,6 +199,14 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       flushTextBuffer(textBuffer, nodes, nextListStyle);
       nextListStyle = undefined;
       nodes.push(parseImageDirective(line));
+      i++;
+      continue;
+    }
+
+    if (line.startsWith('@video ')) {
+      flushTextBuffer(textBuffer, nodes, nextListStyle);
+      nextListStyle = undefined;
+      nodes.push(parseVideoDirective(line));
       i++;
       continue;
     }

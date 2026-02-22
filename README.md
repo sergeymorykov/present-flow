@@ -24,6 +24,7 @@
 | `@code [язык] [editable] [run=язык]` | Блок кода. Язык (cpp, js, python и т.д.), `editable` — редактируемый блок, `run=js` или `run=cpp` — кнопка «Запуск». Код до `@end`. |
 | `@table` / `@table noborder` | Таблица. Строки в формате markdown-таблиц (`\| A \| B \|`) до `@end`. С `noborder` — без рамок. |
 | `@image путь [width=N] [height=N]` | Вставка изображения. Путь (например `assets/pic.png`), опционально ширина и высота в пикселях. |
+| `@video путь [fullSlide]` | Вставка видео. Путь (URL или `assets/video.mp4`). С опцией `fullSlide` — растягивается на весь слайд (object-fit: cover). |
 
 ### Однострочные и префиксы
 

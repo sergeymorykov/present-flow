@@ -117,6 +117,7 @@ const EditorPageContent: React.FC = () => {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const editorRef = useRef<MonacoEditorNS.IStandaloneCodeEditor | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const videoInputRef = useRef<HTMLInputElement | null>(null);
   const folderHandleRef = useRef<FileSystemDirectoryHandle | null>(null);
   const { setImageEntry, setImageRegistry, imageRegistry } = useImageRegistry();
 
@@ -174,10 +175,11 @@ const EditorPageContent: React.FC = () => {
     setViewMode(mode);
   }, []);
 
-  const insertImageMarkdown = useCallback(
-    (path: string) => {
+  const insertBlockAtCursor = useCallback(
+    (block: string) => {
       const editor = editorRef.current;
       const current = editor?.getModel()?.getValue() ?? markdown;
+      const text = block.endsWith('\n') ? block : block + '\n';
       let newValue: string;
       if (editor) {
         const model = editor.getModel();
@@ -186,15 +188,27 @@ const EditorPageContent: React.FC = () => {
           model && selection
             ? model.getOffsetAt(selection.getStartPosition())
             : current.length;
-        newValue = current.slice(0, offset) + `![](${path})` + current.slice(offset);
+        newValue = current.slice(0, offset) + text + current.slice(offset);
       } else {
-        newValue = markdown + `\n![](${path})\n`;
+        newValue = markdown + '\n' + text;
       }
       setMarkdown(newValue);
+      if (typeof window !== 'undefined') sessionStorage.setItem(STORAGE_KEY, newValue);
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => setSlides(parsePresentation(newValue)), DEBOUNCE_MS);
     },
     [markdown]
+  );
+
+  const insertImageMarkdown = useCallback(
+    (path: string) => insertBlockAtCursor(`@image ${path}`),
+    [insertBlockAtCursor]
+  );
+
+  const insertVideoMarkdown = useCallback(
+    (path: string, fullSlide?: boolean) =>
+      insertBlockAtCursor(fullSlide ? `@video ${path} fullSlide` : `@video ${path}`),
+    [insertBlockAtCursor]
   );
 
   const handleImageFileSelect = useCallback(
@@ -218,6 +232,23 @@ const EditorPageContent: React.FC = () => {
 
   const handleInsertImageClick = useCallback(() => {
     fileInputRef.current?.click();
+  }, []);
+
+  const handleVideoFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const path = `assets/${file.name}`;
+      const blobUrl = URL.createObjectURL(file);
+      setImageEntry(path, blobUrl);
+      insertVideoMarkdown(path, false);
+      e.target.value = '';
+    },
+    [setImageEntry, insertVideoMarkdown]
+  );
+
+  const handleInsertVideoClick = useCallback(() => {
+    videoInputRef.current?.click();
   }, []);
 
   const handleOpenFolder = useCallback(async () => {
@@ -326,6 +357,14 @@ const EditorPageContent: React.FC = () => {
         aria-label="Выбор файла изображения"
         onChange={handleImageFileSelect}
       />
+      <input
+        ref={videoInputRef}
+        type="file"
+        accept="video/*"
+        className={styles.hiddenInput}
+        aria-label="Выбор файла видео"
+        onChange={handleVideoFileSelect}
+      />
       <div className={styles.toolbar}>
         <span className={styles.toolbarTitle}>
           Слайдов: {slides.length}
@@ -338,6 +377,14 @@ const EditorPageContent: React.FC = () => {
           aria-label="Вставить изображение"
         >
           Вставить изображение
+        </button>
+        <button
+          type="button"
+          className={styles.toggleButton}
+          onClick={handleInsertVideoClick}
+          aria-label="Вставить видео"
+        >
+          Вставить видео
         </button>
 
         {supportsFolderApi && (

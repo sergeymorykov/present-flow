@@ -41,6 +41,13 @@ export type ImageNode = {
   height?: number;
 };
 
+export type VideoNode = {
+  type: 'video';
+  src: string;
+  /** Растянуть видео на весь слайд (object-fit: cover) */
+  fullSlide?: boolean;
+};
+
 export type CodeNode = {
   type: 'code';
   language: string;
@@ -85,6 +92,7 @@ export type StyledBlockNode = {
 export type SlideNode =
   | TextNode
   | ImageNode
+  | VideoNode
   | CodeNode
   | TableNode
   | FragmentNode
