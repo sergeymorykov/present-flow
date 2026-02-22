@@ -2,6 +2,8 @@
   color: #e0e0f0;
   font-size: 1rem;
   line-height: 1.7;
+  text-align: left;
+  width: 100%;
 }
 
 .text h1,

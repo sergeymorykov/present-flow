@@ -21,6 +21,14 @@
   flex: 1;
 }
 
+.hiddenInput {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .toggleButton {
   padding: 6px 16px;
   font-size: 0.85rem;

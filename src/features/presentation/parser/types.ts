@@ -1,7 +1,9 @@
 export type TitleSlide = {
   type: 'title';
   title: string;
+  subtitle?: string;
   author?: string;
+  affiliation?: string;
   date?: string;
 };
 

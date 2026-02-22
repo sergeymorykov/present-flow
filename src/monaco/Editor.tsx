@@ -20,6 +20,7 @@ type EditorProps = {
   onChange: (value: string) => void;
   readOnly?: boolean;
   onMount?: (editor: MonacoEditorNS.IStandaloneCodeEditor) => void;
+  options?: Record<string, unknown>;
 } & (
   | { value: string; defaultValue?: never }
   | { defaultValue: string; value?: never }
@@ -32,6 +33,7 @@ export const Editor: React.FC<EditorProps> = ({
   onChange,
   readOnly = false,
   onMount,
+  options: optionsOverride,
 }) => {
   const handleChange = useCallback(
     (val?: string) => {
@@ -39,6 +41,8 @@ export const Editor: React.FC<EditorProps> = ({
     },
     [onChange]
   );
+
+  const options = { ...EDITOR_OPTIONS, ...optionsOverride, readOnly };
 
   return (
     <div className={styles.container}>
@@ -51,7 +55,7 @@ export const Editor: React.FC<EditorProps> = ({
         defaultValue={defaultValue}
         onChange={handleChange}
         onMount={onMount}
-        options={{ ...EDITOR_OPTIONS, readOnly }}
+        options={options}
       />
     </div>
   );

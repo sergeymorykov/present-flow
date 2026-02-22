@@ -62,23 +62,31 @@ const parseTableRows = (lines: string[]): string[][] => {
 };
 
 const parseTitleBlock = (lines: string[]): TitleSlide => {
-  let title = '';
-  let author: string | undefined;
+  const collected: string[] = [];
   let date: string | undefined;
 
   for (const line of lines) {
-    if (line.startsWith('#')) {
-      title = line.replace(/^#+\s*/, '').trim();
-    } else if (line.startsWith('\\date{')) {
+    if (line.startsWith('\\date{')) {
       date = line.match(/\\date\{([^}]*)\}/)?.[1];
-    } else if (line.trim() && !title) {
-      title = line.trim();
-    } else if (line.trim() && title && !author) {
-      author = line.trim();
+    } else if (line.trim()) {
+      collected.push(line.startsWith('#') ? line.replace(/^#+\s*/, '').trim() : line.trim());
     }
   }
 
-  return { type: 'title', title, author, date };
+  const title = collected[0] ?? '';
+  const len = collected.length;
+  const subtitle = len >= 3 ? collected[1] : undefined;
+  const author = len >= 2 ? collected[len >= 3 ? 2 : 1] : undefined;
+  const affiliation = len >= 4 ? collected[3] : undefined;
+
+  return {
+    type: 'title',
+    title,
+    subtitle,
+    author,
+    affiliation,
+    date,
+  };
 };
 
 const flushTextBuffer = (buffer: string[], nodes: SlideNode[]): void => {
