@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useBlocker } from 'react-router-dom';
 import type { editor as MonacoEditorNS } from 'monaco-editor';
 import { Editor } from '@/monaco/Editor';
 import { SlideRenderer } from '@/features/presentation/renderer/SlideRenderer';
@@ -6,6 +7,14 @@ import { parsePresentation } from '@/features/presentation/parser/parsePresentat
 import { Slide } from '@/features/presentation/parser/types';
 import { ImageRegistryProvider, useImageRegistry } from '@/features/presentation/context/ImageRegistryContext';
 import styles from './EditorPage.module.css';
+
+const STORAGE_KEY = 'present-flow-editor-markdown';
+
+const getInitialMarkdown = (): string => {
+  if (typeof window === 'undefined') return DEFAULT_MARKDOWN;
+  const saved = sessionStorage.getItem(STORAGE_KEY);
+  return saved ?? DEFAULT_MARKDOWN;
+};
 
 const DEBOUNCE_MS = 500;
 
@@ -95,12 +104,13 @@ type ViewMode = 'split' | 'editor' | 'preview';
 const UNSAVED_MESSAGE = 'У вас есть несохранённые изменения. Продолжить без сохранения?';
 
 const EditorPageContent: React.FC = () => {
-  const [markdown, setMarkdown] = useState<string>(DEFAULT_MARKDOWN);
+  const [markdown, setMarkdown] = useState<string>(() => getInitialMarkdown());
   const [slides, setSlides] = useState<Slide[]>(() =>
-    parsePresentation(DEFAULT_MARKDOWN)
+    parsePresentation(typeof window !== 'undefined' ? sessionStorage.getItem(STORAGE_KEY) ?? DEFAULT_MARKDOWN : DEFAULT_MARKDOWN)
   );
   const [viewMode, setViewMode] = useState<ViewMode>('split');
-  const lastSavedMarkdownRef = useRef<string>(DEFAULT_MARKDOWN);
+  const lastSavedMarkdownRef = useRef<string | null>(null);
+  if (lastSavedMarkdownRef.current === null) lastSavedMarkdownRef.current = markdown;
   const currentMarkdownRef = useRef<string>(markdown);
   currentMarkdownRef.current = markdown;
 
@@ -114,7 +124,16 @@ const EditorPageContent: React.FC = () => {
     return editorRef.current?.getModel()?.getValue() ?? markdown;
   }, [markdown]);
 
-  const isDirty = markdown !== lastSavedMarkdownRef.current;
+  const isDirty = markdown !== (lastSavedMarkdownRef.current ?? markdown);
+
+  const blocker = useBlocker(isDirty);
+
+  useEffect(() => {
+    if (blocker.state !== 'blocked') return;
+    const ok = window.confirm(UNSAVED_MESSAGE);
+    if (ok) blocker.proceed();
+    else blocker.reset();
+  }, [blocker.state, blocker]);
 
   useEffect(() => {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -135,13 +154,9 @@ const EditorPageContent: React.FC = () => {
 
   const handleMarkdownChange = useCallback((value?: string) => {
     const newValue = value ?? '';
-
     setMarkdown(newValue);
-
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-
+    if (typeof window !== 'undefined') sessionStorage.setItem(STORAGE_KEY, newValue);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setSlides(parsePresentation(newValue));
     }, DEBOUNCE_MS);
@@ -235,6 +250,7 @@ const EditorPageContent: React.FC = () => {
         setMarkdown(mdContent);
         setSlides(parsePresentation(mdContent));
         lastSavedMarkdownRef.current = mdContent;
+        if (typeof window !== 'undefined') sessionStorage.setItem(STORAGE_KEY, mdContent);
       }
 
       const nextRegistry: Record<string, string> = {};

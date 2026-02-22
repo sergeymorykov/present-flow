@@ -50,12 +50,22 @@ export const PresentationViewer: React.FC<Props> = ({ slides }) => {
     const updateScale = (): void => {
       const w = el.clientWidth;
       const h = el.clientHeight;
-      setScale(Math.min(w / DESIGN_WIDTH, h / DESIGN_HEIGHT, 2) || 1);
+      const maxScale = document.fullscreenElement ? 10 : 2;
+      setScale(Math.min(w / DESIGN_WIDTH, h / DESIGN_HEIGHT, maxScale) || 1);
     };
     updateScale();
     const ro = new ResizeObserver(updateScale);
     ro.observe(el);
-    return () => ro.disconnect();
+    const onFullscreenChange = (): void => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(updateScale);
+      });
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    return () => {
+      ro.disconnect();
+      document.removeEventListener('fullscreenchange', onFullscreenChange);
+    };
   }, []);
 
   const currentSlide = slides[currentIndex];

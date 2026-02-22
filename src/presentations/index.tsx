@@ -9,12 +9,6 @@ export interface PresentationConfig {
 
 export const presentations: PresentationConfig[] = [
   {
-    id: 'presentation-polymorphism',
-    title: 'Полиморфизм в C++',
-    description: 'Презентация о полиморфизме в языке C++ с примерами и объяснениями.',
-    component: lazy(() => import('./PresentationPolymorphism')),
-  },
-  {
     id: 'polymorphism-markdown',
     title: 'Полиморфизм в C++ (Markdown)',
     description: 'Reveal.js презентация из markdown-файла с вертикальными слайдами, LaTeX и Live Code.',
