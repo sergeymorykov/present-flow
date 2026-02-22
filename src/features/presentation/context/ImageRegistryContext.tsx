@@ -1,4 +1,5 @@
-import React, { createContext, useCallback, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { getAssetsRegistry, setAssetsRegistry } from '@/utils/indexedDb';
 
 type ImageRegistryContextValue = {
   imageRegistry: Record<string, string>;
@@ -28,6 +29,21 @@ type ImageRegistryProviderProps = {
 
 export const ImageRegistryProvider: React.FC<ImageRegistryProviderProps> = ({ children }) => {
   const [imageRegistry, setImageRegistry] = useState<Record<string, string>>({});
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    getAssetsRegistry()
+      .then((registry) => {
+        setImageRegistry(registry);
+        setIsLoaded(true);
+      })
+      .catch(() => setIsLoaded(true));
+  }, []);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    setAssetsRegistry(imageRegistry).catch(() => {});
+  }, [imageRegistry, isLoaded]);
 
   const setImageEntry = useCallback((path: string, dataUrl: string) => {
     setImageRegistry((prev) => ({ ...prev, [path]: dataUrl }));

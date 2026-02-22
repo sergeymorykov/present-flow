@@ -6,15 +6,9 @@ import { SlideRenderer } from '@/features/presentation/renderer/SlideRenderer';
 import { parsePresentation } from '@/features/presentation/parser/parsePresentation';
 import { Slide } from '@/features/presentation/parser/types';
 import { ImageRegistryProvider, useImageRegistry } from '@/features/presentation/context/ImageRegistryContext';
+import { compressImageDataUrl } from '@/utils/compressImage';
+import { clearAll, getMarkdown, setMarkdown as persistMarkdown } from '@/utils/indexedDb';
 import styles from './EditorPage.module.css';
-
-const STORAGE_KEY = 'present-flow-editor-markdown';
-
-const getInitialMarkdown = (): string => {
-  if (typeof window === 'undefined') return DEFAULT_MARKDOWN;
-  const saved = sessionStorage.getItem(STORAGE_KEY);
-  return saved ?? DEFAULT_MARKDOWN;
-};
 
 const DEBOUNCE_MS = 500;
 
@@ -104,13 +98,25 @@ type ViewMode = 'split' | 'editor' | 'preview';
 const UNSAVED_MESSAGE = 'У вас есть несохранённые изменения. Продолжить без сохранения?';
 
 const EditorPageContent: React.FC = () => {
-  const [markdown, setMarkdown] = useState<string>(() => getInitialMarkdown());
-  const [slides, setSlides] = useState<Slide[]>(() =>
-    parsePresentation(typeof window !== 'undefined' ? sessionStorage.getItem(STORAGE_KEY) ?? DEFAULT_MARKDOWN : DEFAULT_MARKDOWN)
-  );
+  const [markdown, setMarkdown] = useState<string>(DEFAULT_MARKDOWN);
+  const [slides, setSlides] = useState<Slide[]>(() => parsePresentation(DEFAULT_MARKDOWN));
+
+  useEffect(() => {
+    getMarkdown()
+      .then((saved) => {
+        if (saved) {
+          lastSavedMarkdownRef.current = saved;
+          setMarkdown(saved);
+          setSlides(parsePresentation(saved));
+        }
+      })
+      .catch(() => {});
+  }, []);
   const [viewMode, setViewMode] = useState<ViewMode>('split');
   const lastSavedMarkdownRef = useRef<string | null>(null);
-  if (lastSavedMarkdownRef.current === null) lastSavedMarkdownRef.current = markdown;
+  if (lastSavedMarkdownRef.current === null) {
+    lastSavedMarkdownRef.current = markdown;
+  }
   const currentMarkdownRef = useRef<string>(markdown);
   currentMarkdownRef.current = markdown;
 
@@ -156,7 +162,7 @@ const EditorPageContent: React.FC = () => {
   const handleMarkdownChange = useCallback((value?: string) => {
     const newValue = value ?? '';
     setMarkdown(newValue);
-    if (typeof window !== 'undefined') sessionStorage.setItem(STORAGE_KEY, newValue);
+    persistMarkdown(newValue).catch(() => {});
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setSlides(parsePresentation(newValue));
@@ -193,7 +199,7 @@ const EditorPageContent: React.FC = () => {
         newValue = markdown + '\n' + text;
       }
       setMarkdown(newValue);
-      if (typeof window !== 'undefined') sessionStorage.setItem(STORAGE_KEY, newValue);
+      persistMarkdown(newValue).catch(() => {});
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => setSlides(parsePresentation(newValue)), DEBOUNCE_MS);
     },
@@ -219,10 +225,16 @@ const EditorPageContent: React.FC = () => {
       const reader = new FileReader();
       reader.onload = () => {
         const dataUrl = reader.result;
-        if (typeof dataUrl === 'string') {
-          setImageEntry(path, dataUrl);
-          insertImageMarkdown(path);
-        }
+        if (typeof dataUrl !== 'string') return;
+        compressImageDataUrl(dataUrl)
+          .then((compressed) => {
+            setImageEntry(path, compressed);
+            insertImageMarkdown(path);
+          })
+          .catch(() => {
+            setImageEntry(path, dataUrl);
+            insertImageMarkdown(path);
+          });
       };
       reader.readAsDataURL(file);
       e.target.value = '';
@@ -239,9 +251,15 @@ const EditorPageContent: React.FC = () => {
       const file = e.target.files?.[0];
       if (!file) return;
       const path = `assets/${file.name}`;
-      const blobUrl = URL.createObjectURL(file);
-      setImageEntry(path, blobUrl);
-      insertVideoMarkdown(path, false);
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result;
+        if (typeof dataUrl === 'string') {
+          setImageEntry(path, dataUrl);
+          insertVideoMarkdown(path, false);
+        }
+      };
+      reader.readAsDataURL(file);
       e.target.value = '';
     },
     [setImageEntry, insertVideoMarkdown]
@@ -281,14 +299,15 @@ const EditorPageContent: React.FC = () => {
         setMarkdown(mdContent);
         setSlides(parsePresentation(mdContent));
         lastSavedMarkdownRef.current = mdContent;
-        if (typeof window !== 'undefined') sessionStorage.setItem(STORAGE_KEY, mdContent);
+        persistMarkdown(mdContent).catch(() => {});
       }
 
       const nextRegistry: Record<string, string> = {};
       try {
         const assetsHandle = await dir.getDirectoryHandle('assets');
+        const assetExt = /\.(png|jpg|jpeg|gif|webp|svg|mp4|webm|ogg|mov)$/i;
         for await (const [name, handle] of assetsHandle.entries()) {
-          if (handle.kind === 'file' && /\.(png|jpg|jpeg|gif|webp|svg)$/i.test(name)) {
+          if (handle.kind === 'file' && assetExt.test(name)) {
             const file = await (handle as FileSystemFileHandle).getFile();
             const dataUrl = await new Promise<string>((res, rej) => {
               const r = new FileReader();
@@ -340,6 +359,7 @@ const EditorPageContent: React.FC = () => {
         await w.write(blob);
         await w.close();
       }
+      await clearAll();
     } catch (err) {
       if (err instanceof Error && err.name !== 'AbortError') {
         alert('Ошибка сохранения: ' + err.message);
