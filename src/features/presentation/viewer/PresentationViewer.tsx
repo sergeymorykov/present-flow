@@ -138,7 +138,14 @@ export const PresentationViewer: React.FC<Props> = ({ slides }) => {
 
       <div ref={slideAreaRef} className={styles.slideArea} style={{ ['--scale' as string]: scale }}>
         <div className={styles.slideScaled}>
-          <div key={currentIndex} className={styles.slide}>
+          <div
+            key={currentIndex}
+            className={
+              currentSlide?.type === 'content' && !currentSlide.scroll
+                ? `${styles.slide} ${styles.slideNoScroll}`
+                : styles.slide
+            }
+          >
             {renderSlide(currentSlide, visibleFragments)}
           </div>
         </div>

@@ -67,6 +67,15 @@ const STYLE_ALIGN = /^\\align\s+(left|center|right)\s*$/i;
 const STYLE_MARGIN = /^\\margin\s+([^\s]+)\s+([^\s]+)\s+([^\s]+)\s+([^\s]+)\s*$/;
 const STYLE_MARGIN_ONE = /^\\margin(Left|Right|Top|Bottom)\s+([^\s]+)\s*$/i;
 const STYLE_FONT_SIZE = /^\\fontSize\s+(.+)$/i;
+const STYLE_WIDTH = /^\\width\s+(.+)$/i;
+const STYLE_HEIGHT = /^\\height\s+(.+)$/i;
+
+const isStyleLine = (t: string): boolean =>
+  /^\\align\s/i.test(t) ||
+  /^\\margin/i.test(t) ||
+  /^\\fontSize\s/i.test(t) ||
+  /^\\width\s/i.test(t) ||
+  /^\\height\s/i.test(t);
 
 const parseBlockStyle = (lines: string[]): BlockStyle | undefined => {
   const style: BlockStyle = {};
@@ -96,6 +105,16 @@ const parseBlockStyle = (lines: string[]): BlockStyle | undefined => {
     const fontSizeMatch = t.match(STYLE_FONT_SIZE);
     if (fontSizeMatch) {
       style.fontSize = fontSizeMatch[1].trim();
+      continue;
+    }
+    const widthMatch = t.match(STYLE_WIDTH);
+    if (widthMatch) {
+      style.width = widthMatch[1].trim();
+      continue;
+    }
+    const heightMatch = t.match(STYLE_HEIGHT);
+    if (heightMatch) {
+      style.height = heightMatch[1].trim();
       continue;
     }
   }
@@ -219,9 +238,13 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
         i++;
       }
       if (BLOCK_END.test(lines[i] ?? '')) i++;
+      const styleLinesFrag = fragmentLines.map((l) => l.trim()).filter(isStyleLine);
+      const contentLinesFrag = fragmentLines.filter((l) => !isStyleLine(l.trim()));
+      const styleFrag = parseBlockStyle(styleLinesFrag);
       const node: FragmentNode = {
         type: 'fragment',
-        content: fragmentLines.join('\n'),
+        content: contentLinesFrag.join('\n').trim(),
+        style: styleFrag,
       };
       nodes.push(node);
       continue;
@@ -253,21 +276,38 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
     if (line.startsWith('@columns')) {
       flushTextBuffer(textBuffer, nodes, nextListStyle);
       nextListStyle = undefined;
-      const columns: string[] = [];
-      let currentCol: string[] = [];
+      const blockLines: string[] = [];
       i++;
       while (i < lines.length && !BLOCK_END.test(lines[i])) {
-        if (lines[i].trim() === '@column') {
-          if (currentCol.length) columns.push(currentCol.join('\n'));
-          currentCol = [];
-        } else {
-          currentCol.push(lines[i]);
-        }
+        blockLines.push(lines[i]);
         i++;
       }
-      if (currentCol.length) columns.push(currentCol.join('\n'));
       if (BLOCK_END.test(lines[i] ?? '')) i++;
-      const node: ColumnsNode = { type: 'columns', columns };
+      const firstColIdx = blockLines.findIndex((l) => l.trim() === '@column');
+      const blockStyle =
+        firstColIdx >= 0
+          ? parseBlockStyle(blockLines.slice(0, firstColIdx).map((l) => l.trim()).filter(isStyleLine))
+          : undefined;
+      const restLines = firstColIdx >= 0 ? blockLines.slice(firstColIdx + 1) : [];
+      const columns: string[] = [];
+      const columnStyles: (BlockStyle | undefined)[] = [];
+      let currentStart = 0;
+      for (let k = 0; k <= restLines.length; k++) {
+        if (k === restLines.length || restLines[k].trim() === '@column') {
+          const segment = restLines.slice(currentStart, k);
+          const segStyleLines = segment.map((l) => l.trim()).filter(isStyleLine);
+          const segContent = segment.filter((l) => !isStyleLine(l.trim())).join('\n').trim();
+          columns.push(segContent);
+          columnStyles.push(parseBlockStyle(segStyleLines));
+          currentStart = k + 1;
+        }
+      }
+      const node: ColumnsNode = {
+        type: 'columns',
+        columns,
+        style: blockStyle,
+        columnStyles: columnStyles.length > 0 ? columnStyles : undefined,
+      };
       nodes.push(node);
       continue;
     }
@@ -315,9 +355,16 @@ export const parsePresentation = (markdown: string): Slide[] => {
         continue;
       }
 
-      const nodes = parseSlideContent(group);
+      let contentGroup = group;
+      let scroll = false;
+      const firstTrimmed = contentGroup.find((l) => l.trim())?.trim();
+      if (firstTrimmed === '@yesScroll') {
+        scroll = true;
+        contentGroup = contentGroup.slice(contentGroup.findIndex((l) => l.trim() === '@yesScroll') + 1);
+      }
+      const nodes = parseSlideContent(contentGroup);
       if (nodes.length > 0) {
-        const slide: ContentSlide = { type: 'content', nodes };
+        const slide: ContentSlide = { type: 'content', nodes, ...(scroll && { scroll: true }) };
         slides.push(slide);
       }
     }

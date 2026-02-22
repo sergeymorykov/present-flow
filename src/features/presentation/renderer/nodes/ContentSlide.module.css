@@ -9,3 +9,7 @@
   align-items: stretch;
   max-width: 100%;
 }
+
+.slideNoScroll {
+  overflow: hidden;
+}

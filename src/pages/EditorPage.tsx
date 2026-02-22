@@ -92,18 +92,40 @@ int main() {
 
 type ViewMode = 'split' | 'editor' | 'preview';
 
+const UNSAVED_MESSAGE = 'У вас есть несохранённые изменения. Продолжить без сохранения?';
+
 const EditorPageContent: React.FC = () => {
   const [markdown, setMarkdown] = useState<string>(DEFAULT_MARKDOWN);
   const [slides, setSlides] = useState<Slide[]>(() =>
     parsePresentation(DEFAULT_MARKDOWN)
   );
   const [viewMode, setViewMode] = useState<ViewMode>('split');
+  const lastSavedMarkdownRef = useRef<string>(DEFAULT_MARKDOWN);
+  const currentMarkdownRef = useRef<string>(markdown);
+  currentMarkdownRef.current = markdown;
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const editorRef = useRef<MonacoEditorNS.IStandaloneCodeEditor | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const folderHandleRef = useRef<FileSystemDirectoryHandle | null>(null);
   const { setImageEntry, setImageRegistry, imageRegistry } = useImageRegistry();
+
+  const getCurrentMarkdown = useCallback((): string => {
+    return editorRef.current?.getModel()?.getValue() ?? markdown;
+  }, [markdown]);
+
+  const isDirty = markdown !== lastSavedMarkdownRef.current;
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (currentMarkdownRef.current !== lastSavedMarkdownRef.current) {
+        e.preventDefault();
+        e.returnValue = UNSAVED_MESSAGE;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
 
   const supportsFolderApi = typeof window !== 'undefined' && 'showDirectoryPicker' in window;
 
@@ -188,6 +210,9 @@ const EditorPageContent: React.FC = () => {
       alert('Открытие папки поддерживается только в современных браузерах (Chrome, Edge).');
       return;
     }
+    if (isDirty && !window.confirm(UNSAVED_MESSAGE)) {
+      return;
+    }
     try {
       const dir = await window.showDirectoryPicker!();
       folderHandleRef.current = dir;
@@ -209,6 +234,7 @@ const EditorPageContent: React.FC = () => {
       if (mdContent) {
         setMarkdown(mdContent);
         setSlides(parsePresentation(mdContent));
+        lastSavedMarkdownRef.current = mdContent;
       }
 
       const nextRegistry: Record<string, string> = {};
@@ -235,7 +261,7 @@ const EditorPageContent: React.FC = () => {
         alert('Ошибка открытия папки: ' + err.message);
       }
     }
-  }, [supportsFolderApi, setImageRegistry]);
+  }, [supportsFolderApi, setImageRegistry, isDirty]);
 
   const handleSaveFolder = useCallback(async () => {
     if (!supportsFolderApi || !window.showDirectoryPicker) {
@@ -251,8 +277,10 @@ const EditorPageContent: React.FC = () => {
 
       const mdHandle = await targetDir.getFileHandle('presentation.md', { create: true });
       const writable = await mdHandle.createWritable();
-      await writable.write(editorRef.current?.getModel()?.getValue() ?? markdown);
+      const contentToSave = editorRef.current?.getModel()?.getValue() ?? markdown;
+      await writable.write(contentToSave);
       await writable.close();
+      lastSavedMarkdownRef.current = contentToSave;
 
       const assetsHandle = await targetDir.getDirectoryHandle('assets', { create: true });
       for (const [path, dataUrl] of Object.entries(imageRegistry)) {

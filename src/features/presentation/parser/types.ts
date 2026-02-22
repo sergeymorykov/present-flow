@@ -5,6 +5,10 @@ export type BlockStyle = {
   marginBottom?: string;
   marginLeft?: string;
   fontSize?: string;
+  /** Для колонок: ширина (например 50%, 200px) */
+  width?: string;
+  /** Для колонок: высота (например 200px, 10rem) */
+  height?: string;
 };
 
 export type TitleSlide = {
@@ -55,11 +59,21 @@ export type TableNode = {
 export type FragmentNode = {
   type: 'fragment';
   content: string;
+  style?: BlockStyle;
 };
 
 export type ColumnsNode = {
   type: 'columns';
   columns: string[];
+  style?: BlockStyle;
+  columnStyles?: (BlockStyle | undefined)[];
+};
+
+export type ContentSlide = {
+  type: 'content';
+  nodes: SlideNode[];
+  /** Включить скролл (по умолчанию контент обрезается без скролла) */
+  scroll?: boolean;
 };
 
 export type StyledBlockNode = {
@@ -76,11 +90,6 @@ export type SlideNode =
   | FragmentNode
   | ColumnsNode
   | StyledBlockNode;
-
-export type ContentSlide = {
-  type: 'content';
-  nodes: SlideNode[];
-};
 
 export type ErrorSlide = {
   type: 'error';

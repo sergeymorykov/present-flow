@@ -2,9 +2,8 @@
   display: block;
 }
 
-/* Заставляем прямых потомков наследовать text-align и font-size от обёртки,
-   иначе их собственные классы (.text и др.) переопределяют значения */
+/* Выравнивание через переменную, т.к. inherit на потомках может не сработать из-за их классов */
 .wrapper > * {
-  text-align: inherit !important;
+  text-align: var(--block-text-align, inherit) !important;
   font-size: inherit !important;
 }

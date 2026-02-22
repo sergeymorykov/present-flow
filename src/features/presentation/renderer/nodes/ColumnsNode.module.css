@@ -4,8 +4,18 @@
   flex-wrap: wrap;
 }
 
+.columns > * {
+  text-align: var(--block-text-align, inherit) !important;
+  font-size: inherit !important;
+}
+
 .column {
   flex: 1;
   min-width: 200px;
   color: #e0e0f0;
+}
+
+.column > * {
+  text-align: var(--block-text-align, inherit) !important;
+  font-size: inherit !important;
 }

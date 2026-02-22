@@ -43,7 +43,7 @@ export const StyledBlock: React.FC<Props> = ({
 }) => {
   const s = node.style;
   const style: React.CSSProperties = {
-    ...(s?.textAlign && { textAlign: s.textAlign }),
+    ...(s?.textAlign && { textAlign: s.textAlign, ['--block-text-align' as string]: s.textAlign }),
     ...(s?.marginTop && { marginTop: s.marginTop }),
     ...(s?.marginRight && { marginRight: s.marginRight }),
     ...(s?.marginBottom && { marginBottom: s.marginBottom }),

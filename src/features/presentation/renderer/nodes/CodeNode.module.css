@@ -7,6 +7,7 @@
 
 .editorContainer {
   height: 300px;
+  width: 800px;
   border-radius: 6px;
   border: 1px solid #3a3a5c;
   overflow: hidden;

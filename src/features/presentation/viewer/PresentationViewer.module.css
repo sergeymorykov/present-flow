@@ -38,6 +38,10 @@
   animation: slideIn 0.25s ease forwards;
 }
 
+.slideNoScroll {
+  overflow: hidden;
+}
+
 @keyframes slideIn {
   from {
     opacity: 0;
