@@ -28,7 +28,7 @@ module.exports = (env, argv) => {
     devtool: isProduction ? 'source-map' : 'eval-source-map',
 
     devServer: {
-      port: 3000,
+      port: 5000,
       static: path.join(__dirname, 'dist'),
       hot: true,
       open: true,
