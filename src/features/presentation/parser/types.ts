@@ -9,6 +9,13 @@ export type BlockStyle = {
   width?: string;
   /** Для колонок: высота (например 200px, 10rem) */
   height?: string;
+  backgroundColor?: string;
+  color?: string;
+  padding?: string;
+  borderLeft?: string;
+  borderRadius?: string;
+  gap?: string;
+  border?: string;
 };
 
 export type TitleSlide = {
@@ -52,15 +59,19 @@ export type CodeNode = {
   type: 'code';
   language: string;
   editable: boolean;
+  /** Подсветка кода без редактирования (Monaco readOnly) */
+  readonly?: boolean;
   runnable: boolean;
   runtimeLanguage?: string;
   code: string;
+  style?: BlockStyle;
 };
 
 export type TableNode = {
   type: 'table';
   borderless: boolean;
   rows: string[][];
+  style?: BlockStyle;
 };
 
 export type FragmentNode = {
@@ -71,7 +82,8 @@ export type FragmentNode = {
 
 export type ColumnsNode = {
   type: 'columns';
-  columns: string[];
+  /** Каждая колонка — массив узлов (текст, код, изображения и т.д.) */
+  columns: SlideNode[][];
   style?: BlockStyle;
   columnStyles?: (BlockStyle | undefined)[];
 };
@@ -89,6 +101,21 @@ export type StyledBlockNode = {
   children: SlideNode[];
 };
 
+export type NoteVariant = 'note' | 'warning' | 'tip' | 'important';
+
+export type NoteNode = {
+  type: 'note';
+  variant: NoteVariant;
+  label?: string;
+  children: SlideNode[];
+  style?: BlockStyle;
+};
+
+export type DividerNode = {
+  type: 'divider';
+  color?: string;
+};
+
 export type SlideNode =
   | TextNode
   | ImageNode
@@ -97,7 +124,9 @@ export type SlideNode =
   | TableNode
   | FragmentNode
   | ColumnsNode
-  | StyledBlockNode;
+  | StyledBlockNode
+  | NoteNode
+  | DividerNode;
 
 export type ErrorSlide = {
   type: 'error';

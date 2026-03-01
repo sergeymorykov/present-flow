@@ -4,6 +4,21 @@ import { Editor } from '@/monaco/Editor';
 import { runCode } from '@/features/presentation/codeRunner';
 import styles from './CodeNode.module.css';
 
+const LINE_HEIGHT_EM = 1.6;
+
+const codeBlockStyleToCss = (s: CodeNodeType['style']): React.CSSProperties => {
+  if (!s) return {};
+  return {
+    ...(s.marginTop && { marginTop: s.marginTop }),
+    ...(s.marginRight && { marginRight: s.marginRight }),
+    ...(s.marginBottom && { marginBottom: s.marginBottom }),
+    ...(s.marginLeft && { marginLeft: s.marginLeft }),
+    ...(s.fontSize && { fontSize: s.fontSize }),
+    ...(s.width && { width: s.width }),
+    ...(s.height && { height: s.height }),
+  };
+};
+
 const IDLE_MESSAGE = 'Нажмите "Запустить" для выполнения кода';
 
 type JsConsole = {
@@ -82,17 +97,54 @@ export const CodeNode: React.FC<Props> = ({ node }) => {
     setIsLoading(false);
   }, [node.language, node.runtimeLanguage]);
 
+  const lineCount = Math.max(1, node.code.split('\n').length);
+  const minHeightEm = lineCount * LINE_HEIGHT_EM;
+  const wrapperStyle = codeBlockStyleToCss(node.style);
+  const hasExplicitHeight = Boolean(node.style?.height);
+  const wrapperClass = hasExplicitHeight
+    ? `${styles.wrapper} ${styles.wrapperFixedHeight}`
+    : styles.wrapper;
+  const readOnlyWrapperClass = hasExplicitHeight
+    ? `${styles.codeBlockWrapper} ${styles.wrapperFixedHeight}`
+    : styles.codeBlockWrapper;
+
   if (!node.editable) {
     return (
-      <pre className={styles.staticCode}>
-        <code>{node.code}</code>
-      </pre>
+      <div
+        className={readOnlyWrapperClass}
+        style={Object.keys(wrapperStyle).length > 0 ? wrapperStyle : undefined}
+      >
+        <div
+          className={styles.readOnlyEditorContainer}
+          style={{
+            height: hasExplicitHeight ? undefined : `${minHeightEm}em`,
+            flex: hasExplicitHeight ? undefined : 'none',
+            overflow: hasExplicitHeight ? 'auto' : undefined,
+          }}
+        >
+          <Editor
+            defaultValue={node.code}
+            language={node.language}
+            readOnly
+            onChange={() => {}}
+          />
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className={styles.wrapper}>
-      <div className={styles.editorContainer}>
+    <div
+      className={wrapperClass}
+      style={Object.keys(wrapperStyle).length > 0 ? wrapperStyle : undefined}
+    >
+      <div
+        className={styles.editorContainer}
+        style={{
+          minHeight: hasExplicitHeight ? undefined : `${minHeightEm}em`,
+          overflow: hasExplicitHeight ? 'auto' : undefined,
+        }}
+      >
         <Editor
           defaultValue={node.code}
           language={node.language}

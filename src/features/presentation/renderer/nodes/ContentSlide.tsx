@@ -1,8 +1,10 @@
 import React from 'react';
 import { ContentSlide as ContentSlideType } from '../../parser/types';
 import { NodeRenderer } from '../NodeRenderer';
+import { ColumnsNode } from './ColumnsNode';
 import { FragmentNode } from './FragmentNode';
 import { StyledBlock } from './StyledBlock';
+import { NoteNodeComponent } from './NoteNode';
 import styles from './ContentSlide.module.css';
 
 type Props = {
@@ -28,6 +30,26 @@ export const ContentSlide: React.FC<Props> = ({ slide, visibleFragments }) => {
         if (node.type === 'styled') {
           return (
             <StyledBlock
+              key={i}
+              node={node}
+              visibleFragments={visibleFragments}
+              fragmentCounter={fragmentCounter}
+            />
+          );
+        }
+        if (node.type === 'columns') {
+          return (
+            <ColumnsNode
+              key={i}
+              node={node}
+              visibleFragments={visibleFragments}
+              fragmentCounter={fragmentCounter}
+            />
+          );
+        }
+        if (node.type === 'note') {
+          return (
+            <NoteNodeComponent
               key={i}
               node={node}
               visibleFragments={visibleFragments}

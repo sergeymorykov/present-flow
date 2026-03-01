@@ -1,17 +1,40 @@
-.wrapper {
+.wrapper,
+.codeBlockWrapper {
   display: flex;
   flex-direction: column;
   gap: 10px;
   width: 100%;
+  flex: 1;
+  min-height: 0;
 }
 
-.editorContainer {
-  height: 300px;
-  width: 800px;
+.wrapperFixedHeight {
+  flex: none;
+  min-height: 0;
+}
+
+.codeBlockWrapper {
+  min-height: 0;
+}
+
+.editorContainer,
+.readOnlyEditorContainer {
+  flex: 1;
+  min-height: 4em;
+  width: 100%;
+  max-width: 100%;
   border-radius: 6px;
   border: 1px solid #3a3a5c;
   overflow: hidden;
   position: relative;
+}
+
+.wrapperFixedHeight .editorContainer,
+.wrapperFixedHeight .readOnlyEditorContainer {
+  flex: none;
+  min-height: 0;
+  height: 100%;
+  overflow: auto;
 }
 
 .runButton {

@@ -2,7 +2,9 @@ import React from 'react';
 import { StyledBlockNode as StyledBlockNodeType, SlideNode } from '../../parser/types';
 import { NodeRenderer } from '../NodeRenderer';
 import { FragmentNode } from './FragmentNode';
+import { NoteNodeComponent } from './NoteNode';
 import styles from './StyledBlock.module.css';
+import { blockStyleToCss } from './blockStyleToCss';
 
 type FragmentCounter = { current: number };
 
@@ -33,6 +35,16 @@ const renderStyledChild = (
       />
     );
   }
+  if (child.type === 'note') {
+    return (
+      <NoteNodeComponent
+        key={index}
+        node={child}
+        visibleFragments={visibleFragments}
+        fragmentCounter={fragmentCounter}
+      />
+    );
+  }
   return <NodeRenderer key={index} node={child} />;
 };
 
@@ -41,17 +53,9 @@ export const StyledBlock: React.FC<Props> = ({
   visibleFragments,
   fragmentCounter,
 }) => {
-  const s = node.style;
-  const style: React.CSSProperties = {
-    ...(s?.textAlign && { textAlign: s.textAlign, ['--block-text-align' as string]: s.textAlign }),
-    ...(s?.marginTop && { marginTop: s.marginTop }),
-    ...(s?.marginRight && { marginRight: s.marginRight }),
-    ...(s?.marginBottom && { marginBottom: s.marginBottom }),
-    ...(s?.marginLeft && { marginLeft: s.marginLeft }),
-    ...(s?.fontSize && { fontSize: s.fontSize }),
-  };
-
+  const style = blockStyleToCss(node.style);
   const hasStyle = Object.keys(style).length > 0;
+
   return (
     <div
       className={styles.wrapper}

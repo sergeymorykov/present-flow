@@ -5,10 +5,10 @@ import { ImageNode } from './nodes/ImageNode';
 import { VideoNode } from './nodes/VideoNode';
 import { CodeNode } from './nodes/CodeNode';
 import { TableNode } from './nodes/TableNode';
-import { ColumnsNode } from './nodes/ColumnsNode';
+import { DividerNodeComponent } from './nodes/DividerNode';
 
-// FragmentNode is NOT rendered here — it is handled exclusively by ContentSlide,
-// which passes the correct `visible` prop based on navigation state.
+// FragmentNode, NoteNode, StyledBlock and ColumnsNode are NOT rendered here —
+// they are handled by ContentSlide which passes visibility/fragment state.
 
 type Props = { node: SlideNode };
 
@@ -18,7 +18,7 @@ export const NodeRenderer: React.FC<Props> = ({ node }) => {
   if (node.type === 'video') return <VideoNode node={node} />;
   if (node.type === 'code') return <CodeNode node={node} />;
   if (node.type === 'table') return <TableNode node={node} />;
-  if (node.type === 'columns') return <ColumnsNode node={node} />;
+  if (node.type === 'divider') return <DividerNodeComponent node={node} />;
 
   return null;
 };

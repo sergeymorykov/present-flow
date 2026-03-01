@@ -1,7 +1,7 @@
 .columns {
   display: flex;
   gap: 1.5rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .columns > * {
@@ -11,7 +11,7 @@
 
 .column {
   flex: 1;
-  min-width: 200px;
+  min-width: 0;
   color: #e0e0f0;
 }
 

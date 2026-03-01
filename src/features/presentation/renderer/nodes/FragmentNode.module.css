@@ -1,6 +1,18 @@
+.contentWrapper {
+  margin: 0;
+  padding: 0;
+}
+
+.styledWrapper {
+  margin: 0;
+  padding: 0;
+}
+
 .styledWrapper > * {
   text-align: var(--block-text-align, inherit) !important;
   font-size: inherit !important;
+  margin: 0;
+  padding: 0;
 }
 
 .visible {

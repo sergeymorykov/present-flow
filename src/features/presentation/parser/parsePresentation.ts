@@ -14,6 +14,9 @@ import {
   ErrorSlide,
   BlockStyle,
   StyledBlockNode,
+  NoteNode,
+  NoteVariant,
+  DividerNode,
 } from './types';
 
 const SLIDE_SEPARATOR = /^\s*---\s*$/;
@@ -40,23 +43,45 @@ const parseVideoDirective = (line: string): VideoNode => {
   return { type: 'video', src, ...(fullSlide && { fullSlide: true }) };
 };
 
-const RESERVED_CODE_TOKENS = new Set(['editable']);
+const RESERVED_CODE_TOKENS = new Set(['editable', 'readonly']);
 
 const parseCodeDirective = (line: string): Omit<CodeNode, 'code'> => {
   const raw = line.slice('@code'.length).trim();
   const parts = raw.split(/\s+/).filter(Boolean);
-  const editable = parts.includes('editable');
+  const readonly = parts.includes('readonly');
+  const editable = parts.includes('editable') && !readonly;
 
   const runPart = parts.find((p) => p.startsWith('run='));
   const runnable = Boolean(runPart);
   const runtimeLanguage = runPart ? runPart.slice(4) : undefined;
 
   const langToken = parts.find(
-    (p) => !RESERVED_CODE_TOKENS.has(p) && !p.startsWith('run=')
+    (p) =>
+      !RESERVED_CODE_TOKENS.has(p) &&
+      !p.startsWith('run=') &&
+      !p.startsWith('width=') &&
+      !p.startsWith('height=')
   );
   const language = langToken ?? runtimeLanguage ?? 'text';
 
-  return { type: 'code', language, editable, runnable, runtimeLanguage };
+  const style: BlockStyle | undefined = (() => {
+    const widthPart = parts.find((p) => p.startsWith('width='));
+    const heightPart = parts.find((p) => p.startsWith('height='));
+    const w = widthPart?.slice(6);
+    const h = heightPart?.slice(7);
+    if (w || h) return { ...(w && { width: w }), ...(h && { height: h }) };
+    return undefined;
+  })();
+
+  return {
+    type: 'code',
+    language,
+    editable,
+    ...(readonly && { readonly: true }),
+    runnable,
+    runtimeLanguage,
+    ...(style && { style }),
+  };
 };
 
 const parseTableRows = (lines: string[]): string[][] => {
@@ -77,13 +102,27 @@ const STYLE_MARGIN_ONE = /^\\margin(Left|Right|Top|Bottom)\s+([^\s]+)\s*$/i;
 const STYLE_FONT_SIZE = /^\\fontSize\s+(.+)$/i;
 const STYLE_WIDTH = /^\\width\s+(.+)$/i;
 const STYLE_HEIGHT = /^\\height\s+(.+)$/i;
+const STYLE_BG = /^\\bg\s+(.+)$/i;
+const STYLE_COLOR = /^\\color\s+(.+)$/i;
+const STYLE_PADDING = /^\\padding\s+(.+)$/i;
+const STYLE_BORDER_LEFT = /^\\borderLeft\s+(.+)$/i;
+const STYLE_BORDER_RADIUS = /^\\borderRadius\s+(.+)$/i;
+const STYLE_GAP = /^\\gap\s+(.+)$/i;
+const STYLE_BORDER = /^\\border\s+(.+)$/i;
 
 const isStyleLine = (t: string): boolean =>
   /^\\align\s/i.test(t) ||
   /^\\margin/i.test(t) ||
   /^\\fontSize\s/i.test(t) ||
   /^\\width\s/i.test(t) ||
-  /^\\height\s/i.test(t);
+  /^\\height\s/i.test(t) ||
+  /^\\bg\s/i.test(t) ||
+  /^\\color\s/i.test(t) ||
+  /^\\padding\s/i.test(t) ||
+  /^\\borderLeft\s/i.test(t) ||
+  /^\\borderRadius\s/i.test(t) ||
+  /^\\gap\s/i.test(t) ||
+  /^\\border\s/i.test(t);
 
 const parseBlockStyle = (lines: string[]): BlockStyle | undefined => {
   const style: BlockStyle = {};
@@ -123,6 +162,41 @@ const parseBlockStyle = (lines: string[]): BlockStyle | undefined => {
     const heightMatch = t.match(STYLE_HEIGHT);
     if (heightMatch) {
       style.height = heightMatch[1].trim();
+      continue;
+    }
+    const bgMatch = t.match(STYLE_BG);
+    if (bgMatch) {
+      style.backgroundColor = bgMatch[1].trim();
+      continue;
+    }
+    const colorMatch = t.match(STYLE_COLOR);
+    if (colorMatch) {
+      style.color = colorMatch[1].trim();
+      continue;
+    }
+    const paddingMatch = t.match(STYLE_PADDING);
+    if (paddingMatch) {
+      style.padding = paddingMatch[1].trim();
+      continue;
+    }
+    const borderLeftMatch = t.match(STYLE_BORDER_LEFT);
+    if (borderLeftMatch) {
+      style.borderLeft = borderLeftMatch[1].trim();
+      continue;
+    }
+    const borderRadiusMatch = t.match(STYLE_BORDER_RADIUS);
+    if (borderRadiusMatch) {
+      style.borderRadius = borderRadiusMatch[1].trim();
+      continue;
+    }
+    const gapMatch = t.match(STYLE_GAP);
+    if (gapMatch) {
+      style.gap = gapMatch[1].trim();
+      continue;
+    }
+    const borderMatch = t.match(STYLE_BORDER);
+    if (borderMatch) {
+      style.border = borderMatch[1].trim();
       continue;
     }
   }
@@ -215,6 +289,16 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       flushTextBuffer(textBuffer, nodes, nextListStyle);
       nextListStyle = undefined;
       const borderless = line.includes('noborder');
+      const tableParts = line.slice(6).trim().split(/\s+/).filter(Boolean);
+      const widthPart = tableParts.find((p) => p.startsWith('width='));
+      const heightPart = tableParts.find((p) => p.startsWith('height='));
+      const tableStyle: BlockStyle | undefined =
+        widthPart || heightPart
+          ? {
+              ...(widthPart && { width: widthPart.slice(6) }),
+              ...(heightPart && { height: heightPart.slice(7) }),
+            }
+          : undefined;
       const tableLines: string[] = [];
       i++;
       while (i < lines.length && !BLOCK_END.test(lines[i])) {
@@ -223,7 +307,12 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       }
       if (BLOCK_END.test(lines[i] ?? '')) i++;
       const rows = parseTableRows(tableLines);
-      const node: TableNode = { type: 'table', borderless, rows };
+      const node: TableNode = {
+        type: 'table',
+        borderless,
+        rows,
+        ...(tableStyle && { style: tableStyle }),
+      };
       nodes.push(node);
       continue;
     }
@@ -266,6 +355,38 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       continue;
     }
 
+    if (line.trim() === '@divider' || line.trim().startsWith('@divider ')) {
+      flushTextBuffer(textBuffer, nodes, nextListStyle);
+      nextListStyle = undefined;
+      const colorPart = line.trim().slice('@divider'.length).trim();
+      const node: DividerNode = { type: 'divider', ...(colorPart && { color: colorPart }) };
+      nodes.push(node);
+      i++;
+      continue;
+    }
+
+    const noteMatch = line.trim().match(/^@(note|warning|tip|important)(?:\s+(.*))?$/);
+    if (noteMatch) {
+      flushTextBuffer(textBuffer, nodes, nextListStyle);
+      nextListStyle = undefined;
+      const variant = noteMatch[1] as NoteVariant;
+      const label = noteMatch[2]?.trim() || undefined;
+      const blockLines: string[] = [];
+      i++;
+      while (i < lines.length && !BLOCK_END.test(lines[i])) {
+        blockLines.push(lines[i]);
+        i++;
+      }
+      if (BLOCK_END.test(lines[i] ?? '')) i++;
+      const styleLinesFrag = blockLines.map((l) => l.trim()).filter(isStyleLine);
+      const contentLinesFrag = blockLines.filter((l) => !isStyleLine(l.trim()));
+      const styleFrag = parseBlockStyle(styleLinesFrag);
+      const children = parseSlideContent(contentLinesFrag);
+      const node: NoteNode = { type: 'note', variant, label, children, style: styleFrag };
+      nodes.push(node);
+      continue;
+    }
+
     if (line.trim() === '@style') {
       flushTextBuffer(textBuffer, nodes, nextListStyle);
       nextListStyle = undefined;
@@ -274,7 +395,7 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       i++;
       while (i < lines.length && !BLOCK_END.test(lines[i])) {
         const t = lines[i].trim();
-        if (/^\\align\s/i.test(t) || /^\\margin/i.test(t) || /^\\fontSize\s/i.test(t)) {
+        if (isStyleLine(t)) {
           styleLines.push(t);
         } else {
           contentLines.push(lines[i]);
@@ -294,26 +415,46 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       nextListStyle = undefined;
       const blockLines: string[] = [];
       i++;
-      while (i < lines.length && !BLOCK_END.test(lines[i])) {
-        blockLines.push(lines[i]);
+      let nest = 1;
+      const isBlockStart = (l: string) => {
+        const t = l.trim();
+        return (
+          t.startsWith('@code') ||
+          t.startsWith('@table') ||
+          t.startsWith('@fragment') ||
+          t === '@style' ||
+          t === '@columns' ||
+          /^@(note|warning|tip|important)/.test(t)
+        );
+      };
+      while (i < lines.length) {
+        const currentLine = lines[i];
+        if (BLOCK_END.test(currentLine)) {
+          nest--;
+          i++;
+          if (nest === 0) break;
+          blockLines.push(currentLine);
+          continue;
+        }
+        blockLines.push(currentLine);
         i++;
+        if (isBlockStart(currentLine)) nest++;
       }
-      if (BLOCK_END.test(lines[i] ?? '')) i++;
       const firstColIdx = blockLines.findIndex((l) => l.trim() === '@column');
       const blockStyle =
         firstColIdx >= 0
           ? parseBlockStyle(blockLines.slice(0, firstColIdx).map((l) => l.trim()).filter(isStyleLine))
           : undefined;
       const restLines = firstColIdx >= 0 ? blockLines.slice(firstColIdx + 1) : [];
-      const columns: string[] = [];
+      const columns: SlideNode[][] = [];
       const columnStyles: (BlockStyle | undefined)[] = [];
       let currentStart = 0;
       for (let k = 0; k <= restLines.length; k++) {
         if (k === restLines.length || restLines[k].trim() === '@column') {
           const segment = restLines.slice(currentStart, k);
           const segStyleLines = segment.map((l) => l.trim()).filter(isStyleLine);
-          const segContent = segment.filter((l) => !isStyleLine(l.trim())).join('\n').trim();
-          columns.push(segContent);
+          const segContentLines = segment.filter((l) => !isStyleLine(l.trim()));
+          columns.push(parseSlideContent(segContentLines));
           columnStyles.push(parseBlockStyle(segStyleLines));
           currentStart = k + 1;
         }
