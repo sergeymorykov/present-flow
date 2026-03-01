@@ -173,10 +173,25 @@
     },
     {
       "kind": "block",
-      "tag": "@note/@warning/@tip/@important",
+      "tag": "@note/@warning/@important",
       "syntax": "@note [label] ... @end",
-      "description": "Блоки заметок разных вариантов.",
-      "demo": "@tip Полезно\n\\padding 0.75rem\nИспользуйте @tip, когда нужен акцент на рекомендации.\n@end"
+      "description": "Блоки заметок с вариантами note/warning/important.",
+      "demos": [
+        "@note Примечание\n\\padding 0.75rem\nЭтот блок подходит для дополнительной информации.\n@end",
+        "@warning Внимание\n\\padding 0.75rem\nЭтот блок подходит для важных ограничений и рисков.\n@end",
+        "@important Важно\n\\padding 0.75rem\nЭтот блок подходит для важных ограничений и рисков.\n@end"
+      ]
+    },
+    {
+      "kind": "block",
+      "tag": "@tip",
+      "syntax": "@tip [label] ... @end",
+      "description": "Блок подсказки с акцентом на практические рекомендации.",
+      "demos": [
+        "@tip Полезно\n\\padding 0.75rem\nИспользуйте @tip, когда нужен акцент на рекомендации.\n@end",
+        "@tip Быстрый совет\n\\bg rgba(34, 197, 94, 0.15)\n\\borderLeft 4px solid #22c55e\n\\padding 1rem\nПроверяйте команды run=js прямо в live-preview.\n@end",
+        "@columns\n@column\n\\width 52%\n@tip В колонке\n\\fontSize 1rem\n- Сжимайте блоки\n- Давайте короткие советы\n@end\n@column\n\\width 48%\nТекст рядом с подсказкой.\n@end"
+      ]
     },
     {
       "kind": "inline",

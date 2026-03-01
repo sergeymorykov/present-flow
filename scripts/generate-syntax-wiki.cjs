@@ -21,10 +21,17 @@ const readRegistry = () => {
 
 const formatInlineCode = (value) => `\`${value}\``;
 
+const escapeMarkdownTableCell = (value) => {
+  const normalized = String(value ?? '').replace(/\r?\n/g, '<br>');
+  return normalized.replace(/\|/g, '\\|');
+};
+
+const formatInlineCodeCell = (value) => formatInlineCode(escapeMarkdownTableCell(value));
+
 const renderEntriesTable = (entries) => {
   const header = ['| Тег | Синтаксис | Описание |', '|-----|----------|----------|'];
   const rows = entries.map((entry) => {
-    return `| ${formatInlineCode(entry.tag)} | ${formatInlineCode(entry.syntax)} | ${entry.description} |`;
+    return `| ${formatInlineCodeCell(entry.tag)} | ${formatInlineCodeCell(entry.syntax)} | ${escapeMarkdownTableCell(entry.description)} |`;
   });
   return [...header, ...rows].join('\n');
 };
@@ -32,25 +39,41 @@ const renderEntriesTable = (entries) => {
 const renderStyleCommandsTable = (commands) => {
   const header = ['| Команда | Описание |', '|---------|----------|'];
   const rows = commands.map((entry) => {
-    return `| ${formatInlineCode(entry.command)} | ${entry.description} |`;
+    return `| ${formatInlineCodeCell(entry.command)} | ${escapeMarkdownTableCell(entry.description)} |`;
   });
   return [...header, ...rows].join('\n');
 };
 
+const collectEntryDemos = (entry) => {
+  if (Array.isArray(entry.demos)) {
+    return entry.demos.filter((demo) => typeof demo === 'string' && demo.trim().length > 0);
+  }
+
+  if (typeof entry.demo === 'string' && entry.demo.trim().length > 0) {
+    return [entry.demo];
+  }
+
+  return [];
+};
+
 const renderDemoSection = (entries) => {
-  const demoEntries = entries.filter((entry) => typeof entry.demo === 'string' && entry.demo.trim().length > 0);
+  const demoEntries = entries
+    .map((entry) => ({ entry, demos: collectEntryDemos(entry) }))
+    .filter(({ demos }) => demos.length > 0);
   if (demoEntries.length === 0) {
     return '';
   }
 
   const lines = ['## Live-демо', '', 'В блоках ниже можно менять пример и сразу видеть результат.', ''];
-  for (const entry of demoEntries) {
+  for (const { entry, demos } of demoEntries) {
     lines.push(`### ${entry.tag}`);
     lines.push('');
-    lines.push('```presentation-demo');
-    lines.push(entry.demo.trimEnd());
-    lines.push('```');
-    lines.push('');
+    for (const demo of demos) {
+      lines.push('```presentation-demo');
+      lines.push(demo.trimEnd());
+      lines.push('```');
+      lines.push('');
+    }
   }
   return lines.join('\n');
 };

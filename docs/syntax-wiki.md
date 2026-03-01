@@ -19,9 +19,10 @@
 | `@style` | `@style ... @end` | Стилизованный контейнер для дочернего контента. |
 | `@fragment` | `@fragment ... @end` | Фрагмент, который появляется по шагам. |
 | `@columns/@column` | `@columns ... @column ... @column ... @end` | Макет из колонок с индивидуальными стилями. |
-| `@code` | `@code [language] [editable|readonly] [width=...] [height=...] [run=lang]` | Блок кода, включая запуск JS/TS и C/C++. |
+| `@code` | `@code [language] [editable\|readonly] [width=...] [height=...] [run=lang]` | Блок кода, включая запуск JS/TS и C/C++. |
 | `@table` | `@table [noborder] [width=...] [height=...] ... @end` | Markdown-таблица с опциональными рамками и размерами. |
-| `@note/@warning/@tip/@important` | `@note [label] ... @end` | Блоки заметок разных вариантов. |
+| `@note/@warning/@important` | `@note [label] ... @end` | Блоки заметок с вариантами note/warning/important. |
+| `@tip` | `@tip [label] ... @end` | Блок подсказки с акцентом на практические рекомендации. |
 
 ## Однострочные и префиксы
 
@@ -38,7 +39,7 @@
 |---------|----------|
 | `\align` | Выравнивание текста |
 | `\margin` | Отступы в порядке top/right/bottom/left |
-| `\marginTop|\marginRight|\marginBottom|\marginLeft` | Отступ одной стороны |
+| `\marginTop\|\marginRight\|\marginBottom\|\marginLeft` | Отступ одной стороны |
 | `\fontSize` | Размер текста |
 | `\width` | Ширина блока |
 | `\height` | Высота блока |
@@ -159,12 +160,59 @@ console.log('2 + 3 =', sum(2, 3));
 @end
 ```
 
-### @note/@warning/@tip/@important
+### @note/@warning/@important
+
+```presentation-demo
+@note Примечание
+\padding 0.75rem
+Этот блок подходит для дополнительной информации.
+@end
+```
+
+```presentation-demo
+@warning Внимание
+\padding 0.75rem
+Этот блок подходит для важных ограничений и рисков.
+@end
+```
+
+```presentation-demo
+@important Важно
+\padding 0.75rem
+Этот блок подходит для важных ограничений и рисков.
+@end
+```
+
+### @tip
 
 ```presentation-demo
 @tip Полезно
 \padding 0.75rem
 Используйте @tip, когда нужен акцент на рекомендации.
+@end
+```
+
+```presentation-demo
+@tip Быстрый совет
+\bg rgba(34, 197, 94, 0.15)
+\borderLeft 4px solid #22c55e
+\padding 1rem
+Проверяйте команды run=js прямо в live-preview.
+@end
+```
+
+```presentation-demo
+@columns
+@column
+\width 52%
+@tip В колонке
+\fontSize 1rem
+- Сжимайте блоки
+- Давайте короткие советы
+@end
+@column
+\width 48%
+Текст рядом с подсказкой.
 @end
 ```
 

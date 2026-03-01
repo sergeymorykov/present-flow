@@ -26,6 +26,8 @@ const wikiContent = fs.readFileSync(wikiPath, 'utf8');
 
 const failed = [];
 
+const normalizeForWikiTableCell = (value) => String(value ?? '').replace(/\r?\n/g, '<br>').replace(/\|/g, '\\|');
+
 const mustContainInParser = [
   'SYNTAX_REGISTRY.blockDirectives.imagePrefix',
   'SYNTAX_REGISTRY.blockDirectives.videoPrefix',
@@ -65,7 +67,8 @@ for (const entry of registry.entries) {
 }
 
 for (const command of registry.styleCommands) {
-  if (!wikiContent.includes(`\`${command.command}\``)) {
+  const expectedMarker = `\`${normalizeForWikiTableCell(command.command)}\``;
+  if (!wikiContent.includes(expectedMarker)) {
     failed.push(`wiki is missing style command: ${command.command}`);
   }
 }
