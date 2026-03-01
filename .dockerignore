@@ -1,0 +1,32 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+coverage
+
+# VCS
+.git
+.gitignore
+
+# Environment / local configs
+.env
+.env.*
+!.env.example
+
+# IDE / editor
+.idea
+.vscode
+.cursor
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
