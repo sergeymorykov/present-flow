@@ -59,13 +59,10 @@ RAII, Rule of 6, SRP, типичные ошибки
 @section Повторение
 
 ---
-@yesScroll
+
 # Конструктор базового класса
 
-@columns
-@column
-
-@code cpp readonly 
+@code cpp readonly height=250px
 struct Animal {
     Animal(const std::string& name)
         : name_(name) {}
@@ -264,16 +261,16 @@ sizeof(Dog)    == 24  // vptr + string + int + pad
 @section Операторы и static
 
 ---
-@yesScroll
+
 # Перегрузка операторов
 
 @columns
 @column
-\width 50%
+\width 48%
 
 **Свободные функции:**
 
-@code cpp readonly
+@code cpp readonly height=250px
 Vec operator+(const Vec& a,
               const Vec& b) {
     return {a.x + b.x, a.y + b.y};
@@ -287,11 +284,11 @@ std::ostream& operator<<(
 @end
 
 @column
-\width 50%
+\width 49%
 
 **Методы класса:**
 
-@code cpp readonly
+@code cpp readonly height=250px
 class Vec {
     double x, y;
 public:
@@ -397,9 +394,9 @@ public:
 
 @columns
 @column
-\width 55%
+\width 53%
 
-@code cpp readonly
+@code cpp readonly height=220px
 class Foo {
 public:
     void f() {
@@ -412,9 +409,9 @@ public:
 @end
 
 @column
-\width 45%
+\width 44%
 
-@code cpp readonly
+@code cpp readonly height=220px
 Foo a;
 a.f();          // "non-const"
 
@@ -438,7 +435,7 @@ c.f();          // "const"
 @columns
 @column
 
-@code cpp readonly
+@code cpp readonly height=367px
 class Animal {
     static std::string unknown;
 public:

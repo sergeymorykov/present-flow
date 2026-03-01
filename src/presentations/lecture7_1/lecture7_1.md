@@ -130,7 +130,7 @@ public:
 @end
 
 ---
-
+@yesScroll
 # Семантика указателя и функтор
 
 @columns
@@ -195,6 +195,7 @@ if (less(3, 5))
 @column
 \width 55%
 
+
 @code cpp readonly
 struct A {
     void foo() {}  // 1
@@ -217,14 +218,12 @@ c->foo(); // Какая будет вызвана?
 @column
 \width 45%
 
-@fragment
 @warning Early Binding
 Будет вызвана **1** (метод A).
 
 Компилятор смотрит на **тип указателя**, а не на реальный объект.
 
 Это **статическое связывание**.
-@end
 @end
 
 @end
@@ -237,7 +236,7 @@ c->foo(); // Какая будет вызвана?
 @column
 \width 55%
 
-@code cpp readonly
+@code cpp readonly height=420px
 struct A {
     virtual void foo() const {} // 1
 };
@@ -283,7 +282,7 @@ d.foo();  // Вызвана 2 (динамическое!)
 
 @column
 
-@code cpp readonly
+@code cpp readonly height=290px
 struct Base {
     virtual void process(int x);
 };
@@ -302,17 +301,15 @@ struct Bad : Sealed { }; // Ошибка!
 
 @end
 
-@fragment
 @tip Совет
 Всегда используйте **override** — если сигнатура базового метода изменится, компилятор выдаст ошибку вместо скрытого бага.
-@end
 @end
 
 ---
 
 # Live Demo: Полиморфизм
 
-@code cpp editable run=cpp
+@code cpp editable run=cpp width=800px height=300px
 #include <iostream>
 
 struct Animal {
@@ -345,16 +342,13 @@ int main() {
 @end
 
 ---
-
-@yesScroll
-
 # Полиморфизм «на C»
 
 @columns
-@column
-\width 50%
+@column 
+\width 48%
 
-@code cpp readonly
+@code cpp readonly height=300px
 struct DeviceVFT {
     void (*write)(Device* self,
                   const char* msg);
@@ -371,9 +365,9 @@ void Device_write(Device* self,
 @end
 
 @column
-\width 50%
+\width 49%
 
-@code cpp readonly
+@code cpp readonly height=300px
 struct Console {
     DeviceVFT vft_;
     int id_;
@@ -488,7 +482,7 @@ struct A {
 
 # Чисто виртуальные функции
 
-@code cpp readonly
+@code cpp readonly height=280px
 class Writer {
 public:
     virtual ~Writer() {}
