@@ -9,22 +9,22 @@ export interface PresentationConfig {
 
 const lecture7Presentations: PresentationConfig[] = [
   {
-    id: 'lecture7-1-virtual-polymorphism',
-    title: 'Лекция 7.1: Виртуальные функции и полиморфизм',
+    id: 'lecture2-virtual-polymorphism',
+    title: 'Лекция 2: Виртуальные функции и полиморфизм',
     description: 'Повторение, сокрытие, виртуальные функции, vtable, деструкторы, абстрактные классы, множественное и ромбовидное наследование.',
     component: lazy(() =>
-      import('./lecture7_1/PresentationLecture7_1').then((m) => ({
-        default: m.PresentationLecture7_1,
+      import('./lecture2/PresentationLecture2').then((m) => ({
+        default: m.PresentationLecture2,
       }))
     ),
   },
   {
-    id: 'lecture7-2-layout-design',
-    title: 'Лекция 7.2: Layout памяти и дизайн классов',
+    id: 'lecture4-layout-design',
+    title: 'Лекция 4: Layout памяти и дизайн классов',
     description: 'Layout памяти, padding, операторы, const/mutable, static, принципы проектирования классов.',
     component: lazy(() =>
-      import('./lecture7_2/PresentationLecture7_2').then((m) => ({
-        default: m.PresentationLecture7_2,
+      import('./lecture4/PresentationLecture4').then((m) => ({
+        default: m.PresentationLecture4,
       }))
     ),
   },

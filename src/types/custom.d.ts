@@ -23,6 +23,21 @@ declare module '*.png' {
   export default src;
 }
 
+declare module '*.mp4' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.mp4' {
+  const src: string;
+  export default src;
+}
+
+declare module '*.webm' {
+  const src: string;
+  export default src;
+}
+
 declare module '*.module.css' {
   const styles: Record<string, string>;
   export default styles;

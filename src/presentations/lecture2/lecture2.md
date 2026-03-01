@@ -1,6 +1,6 @@
 @title
 # Виртуальные функции и полиморфизм
-Лекция 7.1 — Повторение, виртуальные функции, наследование
+Лекция 2 — Повторение, виртуальные функции, наследование
 Курс по C++
 \date{2026}
 
@@ -422,7 +422,7 @@ sizeof(B) == 16  // vptr(8) + int(4) + padding(4)
 @column
 \width 45%
 
-@image assets/lecture7/vftable.jpg width=380
+@image assets/lecture2/vftable.jpg width=380
 
 @end
 
@@ -624,7 +624,7 @@ sizeof(D) == 48   // два экземпляра A!
 @column
 \width 45%
 
-@image assets/lecture7/classes_diagram_cat.png width=350
+@image assets/lecture2/classes_diagram_cat.png width=350
 
 @end
 
@@ -657,7 +657,7 @@ sizeof(D) == 40  // одна копия A!
 @column
 \width 45%
 
-@image assets/lecture7/std-basic_iostream-inheritance.png width=350
+@image assets/lecture2/std-basic_iostream-inheritance.png width=350
 
 Пример из стандартной библиотеки: `std::basic_iostream`
 

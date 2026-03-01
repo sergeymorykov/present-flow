@@ -1,6 +1,6 @@
 @title
 # Layout памяти, операторы и дизайн классов
-Лекция 7.2 — Внутреннее устройство, операторы, static, принципы
+Лекция 4 — Внутреннее устройство, операторы, static, принципы
 Курс по C++
 \date{2026}
 
@@ -148,7 +148,7 @@ struct Point {
 sizeof(Point) == 8
 @end
 
-@image assets/lecture7/layout_point.jpg width=350
+@image assets/lecture4/layout_point.jpg width=350
 
 @column
 \width 50%
@@ -163,7 +163,7 @@ struct S {
 };
 @end
 
-@image assets/lecture7/layout_padding.jpg width=350
+@image assets/lecture4/layout_padding.jpg width=350
 
 @end
 
@@ -175,12 +175,12 @@ struct S {
 @column
 \width 50%
 
-@image assets/lecture7/layout_padding_2.jpg width=400
+@image assets/lecture4/layout_padding_2.jpg width=400
 
 @column
 \width 50%
 
-@image assets/lecture7/layout_padding_3.jpg width=400
+@image assets/lecture4/layout_padding_3.jpg width=400
 
 @end
 
@@ -200,14 +200,14 @@ struct S {
 
 **Простое наследование:**
 
-@image assets/lecture7/layout_inheritance.jpg width=380
+@image assets/lecture4/layout_inheritance.jpg width=380
 
 @column
 \width 50%
 
 **Множественное наследование:**
 
-@image assets/lecture7/layout_multiple_inheritance.jpg width=380
+@image assets/lecture4/layout_multiple_inheritance.jpg width=380
 
 @end
 
@@ -215,7 +215,7 @@ struct S {
 @yesScroll
 # Layout с vtable
 
-@image assets/lecture7/layout_vtable_3.jpg width=700
+@image assets/lecture4/layout_vtable_3.jpg width=700
 
 @note note Overhead
 Каждый объект с virtual-методами хранит **vptr** (8 байт на 64-bit). Таблица vtable — одна на класс, а не на объект.
@@ -248,7 +248,7 @@ sizeof(Dog)    == 24  // vptr + string + int + pad
 @column
 \width 50%
 
-@image assets/lecture7/vftable.jpg width=380
+@image assets/lecture4/vftable.jpg width=380
 
 @note note
 Каждый класс с virtual-методами имеет **свою** vtable. Объекты хранят только указатель на неё (vptr).
