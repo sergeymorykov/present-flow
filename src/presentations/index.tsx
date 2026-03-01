@@ -19,6 +19,16 @@ const lecture7Presentations: PresentationConfig[] = [
     ),
   },
   {
+    id: 'lecture-3-qt-framework',
+    title: 'Лекция 3: Разработка приложений с помощью Qt',
+    description: 'Установка Qt Framework на Windows и его архитектура.',
+    component: lazy(() =>
+      import('./lecture3/PresentationLecture3').then((m) => ({
+        default: m.PresentationLecture3,
+      }))
+    ),
+  },
+  {
     id: 'lecture4-layout-design',
     title: 'Лекция 4: Layout памяти и дизайн классов',
     description: 'Layout памяти, padding, операторы, const/mutable, static, принципы проектирования классов.',
