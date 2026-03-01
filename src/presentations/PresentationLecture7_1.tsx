@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { SlideRenderer } from '@/features/presentation/renderer/SlideRenderer';
 import { parsePresentation } from '@/features/presentation/parser/parsePresentation';
-import markdownContent from './lecture7_1.md';
+import markdownContent from './lecture7_1.md?raw';
 
 import vftableImg from './assets/lecture7/vftable.jpg';
 import classesDiagramCatImg from './assets/lecture7/classes_diagram_cat.png';

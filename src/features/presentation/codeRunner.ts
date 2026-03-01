@@ -28,10 +28,10 @@ export const runCode = async (
   language: string,
   code: string
 ): Promise<CompileResult> => {
-  const compilerUrl = process.env.CPP_COMPILER_URL;
+  const compilerUrl = import.meta.env.VITE_CPP_COMPILER_URL;
 
   if (!compilerUrl) {
-    return { output: '', error: 'CPP_COMPILER_URL не задан в .env' };
+    return { output: '', error: 'VITE_CPP_COMPILER_URL не задан в .env' };
   }
 
   const compiler = LANGUAGE_TO_COMPILER[language];

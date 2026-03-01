@@ -1,27 +1,29 @@
 {
   "compilerOptions": {
-    "target": "ES6",
-    "lib": ["DOM", "ES2019"],
+    "target": "ES2020",
+    "lib": ["DOM", "DOM.Iterable", "ES2020"],
     "jsx": "react-jsx",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
+    "isolatedModules": true,
+    "useDefineForClassFields": true,
+    "noEmit": true,
     "resolveJsonModule": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
+    
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
     }
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "webpack.config.js"]
+  "include": ["src/**/*", "src/vite-env.d.ts"],
+  "exclude": ["node_modules", "dist"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }
