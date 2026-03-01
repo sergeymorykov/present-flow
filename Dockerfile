@@ -5,6 +5,10 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
+# Vite reads VITE_* only at build time
+ARG VITE_CPP_COMPILER_URL
+ENV VITE_CPP_COMPILER_URL=${VITE_CPP_COMPILER_URL}
+
 # Install dependencies using lockfile for reproducible builds
 COPY package*.json ./
 RUN npm ci
