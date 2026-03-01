@@ -18,12 +18,19 @@ import {
   NoteVariant,
   DividerNode,
 } from './types';
+import {
+  SYNTAX_REGISTRY,
+  NOTE_VARIANTS_REGEX_PART,
+  LIST_DIRECTIVE_REGEX,
+  STYLE_COMMANDS,
+  STYLE_COMMAND_PREFIXES,
+} from './syntaxRegistry';
 
 const SLIDE_SEPARATOR = /^\s*---\s*$/;
-const BLOCK_END = /^\s*@end\s*$/;
+const BLOCK_END = new RegExp(`^\\s*${SYNTAX_REGISTRY.blockDirectives.end}\\s*$`);
 
 const parseImageDirective = (line: string): ImageNode => {
-  const parts = line.slice('@image'.length).trim().split(/\s+/);
+  const parts = line.slice(SYNTAX_REGISTRY.blockDirectives.imagePrefix.trim().length).trim().split(/\s+/);
   const src = parts[0] ?? '';
   const node: ImageNode = { type: 'image', src };
 
@@ -37,7 +44,7 @@ const parseImageDirective = (line: string): ImageNode => {
 };
 
 const parseVideoDirective = (line: string): VideoNode => {
-  const parts = line.slice('@video'.length).trim().split(/\s+/);
+  const parts = line.slice(SYNTAX_REGISTRY.blockDirectives.videoPrefix.trim().length).trim().split(/\s+/);
   const src = parts[0] ?? '';
   const fullSlide = parts.slice(1).some((p) => p.toLowerCase() === 'fullslide');
   return { type: 'video', src, ...(fullSlide && { fullSlide: true }) };
@@ -46,7 +53,7 @@ const parseVideoDirective = (line: string): VideoNode => {
 const RESERVED_CODE_TOKENS = new Set(['editable', 'readonly']);
 
 const parseCodeDirective = (line: string): Omit<CodeNode, 'code'> => {
-  const raw = line.slice('@code'.length).trim();
+  const raw = line.slice(SYNTAX_REGISTRY.blockDirectives.code.length).trim();
   const parts = raw.split(/\s+/).filter(Boolean);
   const readonly = parts.includes('readonly');
   const editable = parts.includes('editable') && !readonly;
@@ -96,33 +103,24 @@ const parseTableRows = (lines: string[]): string[][] => {
     );
 };
 
-const STYLE_ALIGN = /^\\align\s+(left|center|right)\s*$/i;
-const STYLE_MARGIN = /^\\margin\s+([^\s]+)\s+([^\s]+)\s+([^\s]+)\s+([^\s]+)\s*$/;
-const STYLE_MARGIN_ONE = /^\\margin(Left|Right|Top|Bottom)\s+([^\s]+)\s*$/i;
-const STYLE_FONT_SIZE = /^\\fontSize\s+(.+)$/i;
-const STYLE_WIDTH = /^\\width\s+(.+)$/i;
-const STYLE_HEIGHT = /^\\height\s+(.+)$/i;
-const STYLE_BG = /^\\bg\s+(.+)$/i;
-const STYLE_COLOR = /^\\color\s+(.+)$/i;
-const STYLE_PADDING = /^\\padding\s+(.+)$/i;
-const STYLE_BORDER_LEFT = /^\\borderLeft\s+(.+)$/i;
-const STYLE_BORDER_RADIUS = /^\\borderRadius\s+(.+)$/i;
-const STYLE_GAP = /^\\gap\s+(.+)$/i;
-const STYLE_BORDER = /^\\border\s+(.+)$/i;
+const styleRegexByName = new Map(STYLE_COMMANDS.map((entry) => [entry.name, entry.compiledRegex]));
+
+const STYLE_ALIGN = styleRegexByName.get('align')!;
+const STYLE_MARGIN = styleRegexByName.get('margin')!;
+const STYLE_MARGIN_ONE = styleRegexByName.get('marginOne')!;
+const STYLE_FONT_SIZE = styleRegexByName.get('fontSize')!;
+const STYLE_WIDTH = styleRegexByName.get('width')!;
+const STYLE_HEIGHT = styleRegexByName.get('height')!;
+const STYLE_BG = styleRegexByName.get('bg')!;
+const STYLE_COLOR = styleRegexByName.get('color')!;
+const STYLE_PADDING = styleRegexByName.get('padding')!;
+const STYLE_BORDER_LEFT = styleRegexByName.get('borderLeft')!;
+const STYLE_BORDER_RADIUS = styleRegexByName.get('borderRadius')!;
+const STYLE_GAP = styleRegexByName.get('gap')!;
+const STYLE_BORDER = styleRegexByName.get('border')!;
 
 const isStyleLine = (t: string): boolean =>
-  /^\\align\s/i.test(t) ||
-  /^\\margin/i.test(t) ||
-  /^\\fontSize\s/i.test(t) ||
-  /^\\width\s/i.test(t) ||
-  /^\\height\s/i.test(t) ||
-  /^\\bg\s/i.test(t) ||
-  /^\\color\s/i.test(t) ||
-  /^\\padding\s/i.test(t) ||
-  /^\\borderLeft\s/i.test(t) ||
-  /^\\borderRadius\s/i.test(t) ||
-  /^\\gap\s/i.test(t) ||
-  /^\\border\s/i.test(t);
+  STYLE_COMMAND_PREFIXES.some((prefix) => t.toLowerCase().startsWith(`\\${prefix.toLowerCase()}`));
 
 const parseBlockStyle = (lines: string[]): BlockStyle | undefined => {
   const style: BlockStyle = {};
@@ -212,7 +210,7 @@ const parseTitleBlock = (lines: string[]): TitleSlide => {
     const t = line.trim();
     if (line.startsWith('\\date{')) {
       date = line.match(/\\date\{([^}]*)\}/)?.[1];
-    } else if (/^\\align\s/i.test(t) || /^\\margin/i.test(t) || /^\\fontSize\s/i.test(t)) {
+    } else if (isStyleLine(t)) {
       styleLines.push(t);
     } else if (t) {
       collected.push(line.startsWith('#') ? line.replace(/^#+\s*/, '').trim() : t);
@@ -237,7 +235,8 @@ const parseTitleBlock = (lines: string[]): TitleSlide => {
   };
 };
 
-const LIST_DIRECTIVE = /^\\list\s+(\S+)\s*$/;
+const LIST_DIRECTIVE = LIST_DIRECTIVE_REGEX;
+const NOTE_DIRECTIVE = new RegExp(`^@(${NOTE_VARIANTS_REGEX_PART})(?:\\s+(.*))?$`);
 
 const flushTextBuffer = (
   buffer: string[],
@@ -269,7 +268,7 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       continue;
     }
 
-    if (line.startsWith('@image ')) {
+    if (line.startsWith(SYNTAX_REGISTRY.blockDirectives.imagePrefix)) {
       flushTextBuffer(textBuffer, nodes, nextListStyle);
       nextListStyle = undefined;
       nodes.push(parseImageDirective(line));
@@ -277,7 +276,7 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       continue;
     }
 
-    if (line.startsWith('@video ')) {
+    if (line.startsWith(SYNTAX_REGISTRY.blockDirectives.videoPrefix)) {
       flushTextBuffer(textBuffer, nodes, nextListStyle);
       nextListStyle = undefined;
       nodes.push(parseVideoDirective(line));
@@ -285,11 +284,15 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       continue;
     }
 
-    if (line.startsWith('@table')) {
+    if (line.startsWith(SYNTAX_REGISTRY.blockDirectives.table)) {
       flushTextBuffer(textBuffer, nodes, nextListStyle);
       nextListStyle = undefined;
       const borderless = line.includes('noborder');
-      const tableParts = line.slice(6).trim().split(/\s+/).filter(Boolean);
+      const tableParts = line
+        .slice(SYNTAX_REGISTRY.blockDirectives.table.length)
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean);
       const widthPart = tableParts.find((p) => p.startsWith('width='));
       const heightPart = tableParts.find((p) => p.startsWith('height='));
       const tableStyle: BlockStyle | undefined =
@@ -317,7 +320,7 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       continue;
     }
 
-    if (line.startsWith('@code')) {
+    if (line.startsWith(SYNTAX_REGISTRY.blockDirectives.code)) {
       flushTextBuffer(textBuffer, nodes, nextListStyle);
       nextListStyle = undefined;
       const attrs = parseCodeDirective(line);
@@ -333,7 +336,7 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       continue;
     }
 
-    if (line.startsWith('@fragment')) {
+    if (line.startsWith(SYNTAX_REGISTRY.blockDirectives.fragment)) {
       flushTextBuffer(textBuffer, nodes, nextListStyle);
       nextListStyle = undefined;
       const fragmentLines: string[] = [];
@@ -355,17 +358,20 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       continue;
     }
 
-    if (line.trim() === '@divider' || line.trim().startsWith('@divider ')) {
+    if (
+      line.trim() === SYNTAX_REGISTRY.blockDirectives.divider ||
+      line.trim().startsWith(`${SYNTAX_REGISTRY.blockDirectives.divider} `)
+    ) {
       flushTextBuffer(textBuffer, nodes, nextListStyle);
       nextListStyle = undefined;
-      const colorPart = line.trim().slice('@divider'.length).trim();
+      const colorPart = line.trim().slice(SYNTAX_REGISTRY.blockDirectives.divider.length).trim();
       const node: DividerNode = { type: 'divider', ...(colorPart && { color: colorPart }) };
       nodes.push(node);
       i++;
       continue;
     }
 
-    const noteMatch = line.trim().match(/^@(note|warning|tip|important)(?:\s+(.*))?$/);
+    const noteMatch = line.trim().match(NOTE_DIRECTIVE);
     if (noteMatch) {
       flushTextBuffer(textBuffer, nodes, nextListStyle);
       nextListStyle = undefined;
@@ -387,7 +393,7 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       continue;
     }
 
-    if (line.trim() === '@style') {
+    if (line.trim() === SYNTAX_REGISTRY.blockDirectives.style) {
       flushTextBuffer(textBuffer, nodes, nextListStyle);
       nextListStyle = undefined;
       const styleLines: string[] = [];
@@ -410,7 +416,7 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       continue;
     }
 
-    if (line.startsWith('@columns')) {
+    if (line.startsWith(SYNTAX_REGISTRY.blockDirectives.columns)) {
       flushTextBuffer(textBuffer, nodes, nextListStyle);
       nextListStyle = undefined;
       const blockLines: string[] = [];
@@ -419,12 +425,12 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       const isBlockStart = (l: string) => {
         const t = l.trim();
         return (
-          t.startsWith('@code') ||
-          t.startsWith('@table') ||
-          t.startsWith('@fragment') ||
-          t === '@style' ||
-          t === '@columns' ||
-          /^@(note|warning|tip|important)/.test(t)
+          t.startsWith(SYNTAX_REGISTRY.blockDirectives.code) ||
+          t.startsWith(SYNTAX_REGISTRY.blockDirectives.table) ||
+          t.startsWith(SYNTAX_REGISTRY.blockDirectives.fragment) ||
+          t === SYNTAX_REGISTRY.blockDirectives.style ||
+          t === SYNTAX_REGISTRY.blockDirectives.columns ||
+          NOTE_DIRECTIVE.test(t)
         );
       };
       while (i < lines.length) {
@@ -440,7 +446,7 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
         i++;
         if (isBlockStart(currentLine)) nest++;
       }
-      const firstColIdx = blockLines.findIndex((l) => l.trim() === '@column');
+      const firstColIdx = blockLines.findIndex((l) => l.trim() === SYNTAX_REGISTRY.blockDirectives.column);
       const blockStyle =
         firstColIdx >= 0
           ? parseBlockStyle(blockLines.slice(0, firstColIdx).map((l) => l.trim()).filter(isStyleLine))
@@ -450,7 +456,7 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       const columnStyles: (BlockStyle | undefined)[] = [];
       let currentStart = 0;
       for (let k = 0; k <= restLines.length; k++) {
-        if (k === restLines.length || restLines[k].trim() === '@column') {
+        if (k === restLines.length || restLines[k].trim() === SYNTAX_REGISTRY.blockDirectives.column) {
           const segment = restLines.slice(currentStart, k);
           const segStyleLines = segment.map((l) => l.trim()).filter(isStyleLine);
           const segContentLines = segment.filter((l) => !isStyleLine(l.trim()));
@@ -497,14 +503,16 @@ export const parsePresentation = (markdown: string): Slide[] => {
 
       const firstLine = group.find((l) => l.trim())?.trim() ?? '';
 
-      if (firstLine === '@title') {
-        const bodyLines = group.slice(group.findIndex((l) => l.trim() === '@title') + 1);
+      if (firstLine === SYNTAX_REGISTRY.slideDirectives.title) {
+        const bodyLines = group.slice(
+          group.findIndex((l) => l.trim() === SYNTAX_REGISTRY.slideDirectives.title) + 1
+        );
         slides.push(parseTitleBlock(bodyLines));
         continue;
       }
 
-      if (firstLine.startsWith('@section ')) {
-        const title = firstLine.slice('@section '.length).trim();
+      if (firstLine.startsWith(SYNTAX_REGISTRY.slideDirectives.sectionPrefix)) {
+        const title = firstLine.slice(SYNTAX_REGISTRY.slideDirectives.sectionPrefix.length).trim();
         const styleLines = group.slice(1).map((l) => l.trim()).filter(Boolean);
         const style = parseBlockStyle(styleLines);
         const node: SectionSlide = { type: 'section', title, style };
@@ -515,9 +523,11 @@ export const parsePresentation = (markdown: string): Slide[] => {
       let contentGroup = group;
       let scroll = false;
       const firstTrimmed = contentGroup.find((l) => l.trim())?.trim();
-      if (firstTrimmed === '@yesScroll') {
+      if (firstTrimmed === SYNTAX_REGISTRY.slideDirectives.yesScroll) {
         scroll = true;
-        contentGroup = contentGroup.slice(contentGroup.findIndex((l) => l.trim() === '@yesScroll') + 1);
+        contentGroup = contentGroup.slice(
+          contentGroup.findIndex((l) => l.trim() === SYNTAX_REGISTRY.slideDirectives.yesScroll) + 1
+        );
       }
       const nodes = parseSlideContent(contentGroup);
       if (nodes.length > 0) {

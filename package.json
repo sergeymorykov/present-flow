@@ -4,7 +4,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "docs:syntax": "node scripts/generate-syntax-wiki.cjs",
+    "docs:syntax:check": "node scripts/check-syntax-wiki.cjs",
+    "docs:syntax:integrity": "node scripts/check-syntax-integrity.cjs",
+    "docs:syntax:verify": "npm run docs:syntax:check && npm run docs:syntax:integrity"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
@@ -15,6 +19,7 @@
     "react-router-dom": "^7.13.0",
     "rehype-katex": "^7.0.1",
     "rehype-raw": "^7.0.0",
+    "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
     "reveal.js": "^5.2.1"
   },

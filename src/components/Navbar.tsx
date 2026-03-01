@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { presentations } from '../presentations';
 
 export const Navbar: React.FC = () => {
   const location = useLocation();
@@ -18,11 +17,9 @@ export const Navbar: React.FC = () => {
             <Link to="/editor" style={styles.editorLink}>
               Редактор
             </Link>
-            {presentations.map((p) => (
-              <Link key={p.id} to={`/presentation/${p.id}`} style={styles.link}>
-                {p.title}
-              </Link>
-            ))}
+            <Link to="/" style={styles.link}>
+              Все презентации
+            </Link>
           </div>
         )}
 

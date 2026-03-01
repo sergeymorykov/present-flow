@@ -8,6 +8,8 @@ import { Slide } from '@/features/presentation/parser/types';
 import { ImageRegistryProvider, useImageRegistry } from '@/features/presentation/context/ImageRegistryContext';
 import { compressImageDataUrl } from '@/utils/compressImage';
 import { clearAll, getMarkdown, setMarkdown as persistMarkdown } from '@/utils/indexedDb';
+import { SyntaxWikiPanel } from '@/components/SyntaxWikiPanel';
+import syntaxWikiContent from '@/content/syntax-wiki.md?raw';
 import styles from './EditorPage.module.css';
 
 const DEBOUNCE_MS = 500;
@@ -100,6 +102,7 @@ const UNSAVED_MESSAGE = 'У вас есть несохранённые изме�
 const EditorPageContent: React.FC = () => {
   const [markdown, setMarkdown] = useState<string>(DEFAULT_MARKDOWN);
   const [slides, setSlides] = useState<Slide[]>(() => parsePresentation(DEFAULT_MARKDOWN));
+  const [showWiki, setShowWiki] = useState(false);
 
   useEffect(() => {
     getMarkdown()
@@ -393,6 +396,15 @@ const EditorPageContent: React.FC = () => {
         <button
           type="button"
           className={styles.toggleButton}
+          onClick={() => setShowWiki(true)}
+          aria-label="Открыть справку по тегам и опциям"
+        >
+          Справка
+        </button>
+
+        <button
+          type="button"
+          className={styles.toggleButton}
           onClick={handleInsertImageClick}
           aria-label="Вставить изображение"
         >
@@ -497,6 +509,13 @@ const EditorPageContent: React.FC = () => {
         <div className={styles.fullPreview}>
           <SlideRenderer slides={slides} />
         </div>
+      )}
+
+      {showWiki && (
+        <SyntaxWikiPanel
+          content={syntaxWikiContent}
+          onClose={() => setShowWiki(false)}
+        />
       )}
     </div>
   );

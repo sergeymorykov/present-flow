@@ -1,0 +1,210 @@
+{
+  "version": 1,
+  "slideDirectives": {
+    "title": "@title",
+    "sectionPrefix": "@section ",
+    "yesScroll": "@yesScroll",
+    "noScroll": "@noScroll"
+  },
+  "blockDirectives": {
+    "end": "@end",
+    "style": "@style",
+    "fragment": "@fragment",
+    "columns": "@columns",
+    "column": "@column",
+    "code": "@code",
+    "table": "@table",
+    "imagePrefix": "@image ",
+    "videoPrefix": "@video ",
+    "divider": "@divider"
+  },
+  "noteVariants": ["note", "warning", "tip", "important"],
+  "styleCommands": [
+    {
+      "name": "align",
+      "command": "\\align",
+      "regex": "^\\\\align\\s+(left|center|right)\\s*$",
+      "description": "Выравнивание текста",
+      "values": ["left", "center", "right"]
+    },
+    {
+      "name": "margin",
+      "command": "\\margin",
+      "regex": "^\\\\margin\\s+([^\\s]+)\\s+([^\\s]+)\\s+([^\\s]+)\\s+([^\\s]+)\\s*$",
+      "description": "Отступы в порядке top/right/bottom/left"
+    },
+    {
+      "name": "marginOne",
+      "command": "\\marginTop|\\marginRight|\\marginBottom|\\marginLeft",
+      "regex": "^\\\\margin(Left|Right|Top|Bottom)\\s+([^\\s]+)\\s*$",
+      "description": "Отступ одной стороны"
+    },
+    {
+      "name": "fontSize",
+      "command": "\\fontSize",
+      "regex": "^\\\\fontSize\\s+(.+)$",
+      "description": "Размер текста"
+    },
+    {
+      "name": "width",
+      "command": "\\width",
+      "regex": "^\\\\width\\s+(.+)$",
+      "description": "Ширина блока"
+    },
+    {
+      "name": "height",
+      "command": "\\height",
+      "regex": "^\\\\height\\s+(.+)$",
+      "description": "Высота блока"
+    },
+    {
+      "name": "bg",
+      "command": "\\bg",
+      "regex": "^\\\\bg\\s+(.+)$",
+      "description": "Фон блока"
+    },
+    {
+      "name": "color",
+      "command": "\\color",
+      "regex": "^\\\\color\\s+(.+)$",
+      "description": "Цвет текста"
+    },
+    {
+      "name": "padding",
+      "command": "\\padding",
+      "regex": "^\\\\padding\\s+(.+)$",
+      "description": "Внутренний отступ"
+    },
+    {
+      "name": "borderLeft",
+      "command": "\\borderLeft",
+      "regex": "^\\\\borderLeft\\s+(.+)$",
+      "description": "Левая граница"
+    },
+    {
+      "name": "borderRadius",
+      "command": "\\borderRadius",
+      "regex": "^\\\\borderRadius\\s+(.+)$",
+      "description": "Скругление углов"
+    },
+    {
+      "name": "gap",
+      "command": "\\gap",
+      "regex": "^\\\\gap\\s+(.+)$",
+      "description": "Расстояние между элементами"
+    },
+    {
+      "name": "border",
+      "command": "\\border",
+      "regex": "^\\\\border\\s+(.+)$",
+      "description": "Граница блока"
+    }
+  ],
+  "listDirective": {
+    "command": "\\list",
+    "regex": "^\\\\list\\s+(\\S+)\\s*$",
+    "styles": [
+      "disc",
+      "circle",
+      "square",
+      "decimal",
+      "decimal-leading-zero",
+      "lower-alpha",
+      "upper-alpha"
+    ]
+  },
+  "entries": [
+    {
+      "kind": "slide",
+      "tag": "@title",
+      "syntax": "@title",
+      "options": ["\\date{...}", "style commands"],
+      "description": "Титульный слайд.",
+      "demo": "@title\n\\align center\n\\fontSize 2.2rem\nPresent Flow\nСинтаксис и live demo\nАвтор\nКоманда\n\\date{2026}"
+    },
+    {
+      "kind": "slide",
+      "tag": "@section",
+      "syntax": "@section Заголовок",
+      "description": "Слайд-разделитель.",
+      "demo": "@section Раздел 1\n\\align center\n\\fontSize 2rem"
+    },
+    {
+      "kind": "slide",
+      "tag": "@yesScroll",
+      "syntax": "@yesScroll",
+      "description": "Включает скролл на контентном слайде.",
+      "demo": "@yesScroll\n# Длинный контент\n- Строка 1\n- Строка 2\n- Строка 3\n- Строка 4\n- Строка 5\n- Строка 6\n- Строка 7\n- Строка 8\n- Строка 9\n- Строка 10"
+    },
+    {
+      "kind": "block",
+      "tag": "@style",
+      "syntax": "@style ... @end",
+      "description": "Стилизованный контейнер для дочернего контента.",
+      "demo": "@style\n\\bg rgba(30, 41, 59, 0.7)\n\\color #e2e8f0\n\\padding 1rem\n\\margin 0.5rem 0 0.5rem 0\n\\borderLeft 4px solid #38bdf8\n\\border 1px solid #334155\n\\borderRadius 8px\nТекст внутри блока @style\n@end"
+    },
+    {
+      "kind": "block",
+      "tag": "@fragment",
+      "syntax": "@fragment ... @end",
+      "description": "Фрагмент, который появляется по шагам.",
+      "demo": "@fragment\n\\marginTop 0.5rem\n\\fontSize 1.1rem\n- Шаг 1\n- Шаг 2\n@end"
+    },
+    {
+      "kind": "block",
+      "tag": "@columns/@column",
+      "syntax": "@columns ... @column ... @column ... @end",
+      "description": "Макет из колонок с индивидуальными стилями.",
+      "demo": "@columns\n\\gap 1rem\n@column\n\\width 45%\n\\align left\nЛевая колонка\n@column\n\\width 55%\n\\align right\nПравая колонка\n@end"
+    },
+    {
+      "kind": "block",
+      "tag": "@code",
+      "syntax": "@code [language] [editable|readonly] [width=...] [height=...] [run=lang]",
+      "description": "Блок кода, включая запуск JS/TS и C/C++.",
+      "demo": "@code js editable run=js height=180px\nconst sum = (a, b) => a + b;\nconsole.log('2 + 3 =', sum(2, 3));\n@end"
+    },
+    {
+      "kind": "block",
+      "tag": "@table",
+      "syntax": "@table [noborder] [width=...] [height=...] ... @end",
+      "description": "Markdown-таблица с опциональными рамками и размерами.",
+      "demo": "@table noborder width=100% height=220px\n| Опция | Значение |\n| --- | --- |\n| border | off |\n| width | 100% |\n| height | 220px |\n@end"
+    },
+    {
+      "kind": "block",
+      "tag": "@note/@warning/@tip/@important",
+      "syntax": "@note [label] ... @end",
+      "description": "Блоки заметок разных вариантов.",
+      "demo": "@tip Полезно\n\\padding 0.75rem\nИспользуйте @tip, когда нужен акцент на рекомендации.\n@end"
+    },
+    {
+      "kind": "inline",
+      "tag": "@image",
+      "syntax": "@image путь [width=N] [height=N]",
+      "description": "Вставка изображения.",
+      "demo": "@image https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=900&q=80 width=420 height=240"
+    },
+    {
+      "kind": "inline",
+      "tag": "@video",
+      "syntax": "@video путь [fullSlide]",
+      "description": "Вставка видео.",
+      "demo": "@video https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+    },
+    {
+      "kind": "inline",
+      "tag": "@divider",
+      "syntax": "@divider [color]",
+      "description": "Горизонтальный разделитель.",
+      "demo": "Текст до разделителя\n@divider #22c55e\nТекст после разделителя"
+    },
+    {
+      "kind": "inline",
+      "tag": "\\list",
+      "syntax": "\\list style",
+      "description": "Задает стиль списка для следующего текстового блока.",
+      "demo": "\\list upper-alpha\n- Первый пункт\n- Второй пункт\n- Третий пункт"
+    }
+  ]
+}
