@@ -38,6 +38,16 @@ const lecture7Presentations: PresentationConfig[] = [
       }))
     ),
   },
+  {
+    id: 'lecture5-templates',
+    title: 'Лекция 5: Шаблоны в C++',
+    description: 'Шаблоны, псевдонимы, статическое определение типов',
+    component: lazy(() =>
+      import('./lecture5/PresentationLecture5').then((m) => ({
+        default: m.PresentationLecture5,
+      }))
+    ),
+  }
 ];
 
 export const presentations: PresentationConfig[] = [
