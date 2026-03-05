@@ -19,7 +19,7 @@
 | `@style` | `@style ... @end` | Стилизованный контейнер для дочернего контента. |
 | `@fragment` | `@fragment ... @end` | Фрагмент, который появляется по шагам. |
 | `@columns/@column` | `@columns ... @column ... @column ... @end` | Макет из колонок с индивидуальными стилями. |
-| `@code` | `@code [language] [editable\|readonly] [width=...] [height=...] [run=lang]` | Блок кода, включая запуск JS/TS и C/C++. |
+| `@code` | `@code [language] [editable\|readonly] [width=...] [height=...] [run=lang] [highlight=lineNum:color,]` | Блок кода, включая запуск JS/TS и C/C++. |
 | `@table` | `@table [noborder] [width=...] [height=...] ... @end` | Markdown-таблица с опциональными рамками и размерами. |
 | `@note/@warning/@important` | `@note [label] ... @end` | Блоки заметок с вариантами note/warning/important. |
 | `@tip` | `@tip [label] ... @end` | Блок подсказки с акцентом на практические рекомендации. |

@@ -61,6 +61,13 @@ const parseCodeDirective = (line: string): Omit<CodeNode, 'code'> => {
   const runPart = parts.find((p) => p.startsWith('run='));
   const runnable = Boolean(runPart);
   const runtimeLanguage = runPart ? runPart.slice(4) : undefined;
+  const highlightPart = parts.find((p) => p.startsWith('highlight='));
+  const highlight = highlightPart?.split('=')[1].split(',').map(item => {
+    const [line, color] = item.split(':');
+    return { lineNumber: +line, color };
+  })
+
+  const showLines = parts.includes('showLines');
 
   const langToken = parts.find(
     (p) =>
@@ -88,6 +95,8 @@ const parseCodeDirective = (line: string): Omit<CodeNode, 'code'> => {
     runnable,
     runtimeLanguage,
     ...(style && { style }),
+    highlight,
+    showLines,
   };
 };
 

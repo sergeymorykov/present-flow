@@ -8,6 +8,46 @@
   min-height: 0;
 }
 
+:global(.line-highlight-red) {
+  background: rgba(255, 0, 0, 0.3);
+  width: 100% !important;
+}
+
+:global(.line-highlight-yellow) {
+  background: rgba(255, 255, 0, 0.25);
+  width: 100% !important;
+}
+
+:global(.line-highlight-green) {
+  background: rgba(0, 255, 0, 0.25);
+  width: 100% !important;
+}
+
+:global(.line-highlight-blue) {
+  background: rgba(100, 149, 237, 0.35);
+  width: 100% !important;
+}
+
+:global(.line-highlight-orange) {
+  background: rgba(255, 165, 0, 0.3);
+  width: 100% !important;
+}
+
+:global(.line-highlight-purple) {
+  background: rgba(199, 147, 255, 0.35);
+  width: 100% !important;
+}
+
+:global(.line-highlight-cyan) {
+  background: rgba(0, 255, 255, 0.25);
+  width: 100% !important;
+}
+
+:global(.line-highlight-pink) {
+  background: rgba(255, 105, 180, 0.3);
+  width: 100% !important;
+}
+
 .wrapperFixedHeight {
   flex: none;
   min-height: 0;

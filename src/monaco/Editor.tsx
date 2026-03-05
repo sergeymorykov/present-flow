@@ -2,6 +2,7 @@ import React, { useCallback } from 'react';
 import MonacoEditor from '@monaco-editor/react';
 import type { editor as MonacoEditorNS } from 'monaco-editor';
 import styles from './Editor.module.css';
+import asmDef from './asmMode';
 
 const EDITOR_OPTIONS = {
   fontSize: 14,
@@ -35,6 +36,14 @@ export const Editor: React.FC<EditorProps> = ({
   onMount,
   options: optionsOverride,
 }) => {
+  const handleBeforeMount = (monaco: any) => {
+    // Check if language is already registered to avoid duplicates
+    if (!monaco.languages.getLanguages().some((lang: any) => lang.id === 'asm')) {
+      monaco.languages.register({ id: 'asm' });
+      monaco.languages.setMonarchTokensProvider('asm', asmDef);
+    }
+  };
+
   const handleChange = useCallback(
     (val?: string) => {
       onChange(val ?? '');
@@ -54,6 +63,7 @@ export const Editor: React.FC<EditorProps> = ({
         value={value}
         defaultValue={defaultValue}
         onChange={handleChange}
+        beforeMount={handleBeforeMount}
         onMount={onMount}
         options={options}
       />

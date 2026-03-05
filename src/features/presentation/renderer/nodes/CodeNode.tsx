@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { CodeNode as CodeNodeType } from '../../parser/types';
 import { Editor } from '@/monaco/Editor';
+import { Range } from 'monaco-editor';
 import { runCode } from '@/features/presentation/codeRunner';
 import styles from './CodeNode.module.css';
 
@@ -127,6 +128,21 @@ export const CodeNode: React.FC<Props> = ({ node }) => {
             language={node.language}
             readOnly
             onChange={() => {}}
+            options={{
+              lineNumbers: node.showLines ? "on" : "off"
+            }}
+            onMount={(editor) => {
+              // Create the collection
+              const decorations = editor.createDecorationsCollection(
+                node.highlight?.map(h => ({
+                  range: new Range(h.lineNumber, 1, h.lineNumber, 1),
+                  options: {
+                    isWholeLine: true,
+                    className: `line-highlight-${h.color}`,
+                  },
+                })) ?? []
+              );
+            }}
           />
         </div>
       </div>

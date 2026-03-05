@@ -65,6 +65,8 @@ export type CodeNode = {
   runtimeLanguage?: string;
   code: string;
   style?: BlockStyle;
+  highlight?: { lineNumber: number, color: string}[]
+  showLines?: boolean;
 };
 
 export type TableNode = {

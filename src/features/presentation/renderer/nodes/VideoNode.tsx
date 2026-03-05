@@ -45,6 +45,7 @@ export const VideoNode: React.FC<Props> = ({ node }) => {
         className={styles.video}
         autoPlay={true}
         muted={true}
+        loop={true}
         playsInline={true}
         controls={true}
         preload="metadata"
