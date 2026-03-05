@@ -1,0 +1,14 @@
+services:
+  present-flow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_CPP_COMPILER_URL: ${VITE_CPP_COMPILER_URL:?VITE_CPP_COMPILER_URL is required in .env}
+    container_name: present-flow
+    environment:
+      PORT: 5000
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+
