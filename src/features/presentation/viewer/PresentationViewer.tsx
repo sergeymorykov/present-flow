@@ -31,6 +31,11 @@ const renderSlide = (slide: Slide, visibleFragments: number): React.ReactElement
 const DESIGN_WIDTH = 960;
 const DESIGN_HEIGHT = 540;
 
+const isCodeEditorTarget = (target: EventTarget | null): boolean => {
+  if (!(target instanceof HTMLElement)) return false;
+  return Boolean(target.closest('.monaco-editor'));
+};
+
 export const PresentationViewer: React.FC<Props> = ({ slides }) => {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [visibleFragments, setVisibleFragments] = useState<number>(0);
@@ -98,6 +103,10 @@ export const PresentationViewer: React.FC<Props> = ({ slides }) => {
   // Keyboard navigation — only when the viewer div has focus
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (isCodeEditorTarget(e.target)) {
+        return;
+      }
+
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
         e.preventDefault();
         goNext();

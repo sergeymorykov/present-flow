@@ -47,6 +47,16 @@ const lecture7Presentations: PresentationConfig[] = [
         default: m.PresentationLecture5,
       }))
     ),
+  },
+  {
+    id: 'lecture6-algorithms-containers',
+    title: 'Лекция 6: Алгоритмы и контейнеры STL',
+    description: 'Практика по std::algorithm и контейнерам STL с runnable C++ примерами.',
+    component: lazy(() =>
+      import('./lecture8/PresentationLecture8').then((m) => ({
+        default: m.PresentationLecture8,
+      }))
+    ),
   }
 ];
 

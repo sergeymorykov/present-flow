@@ -102,10 +102,18 @@ export const CodeNode: React.FC<Props> = ({ node }) => {
   const minHeightEm = lineCount * LINE_HEIGHT_EM;
   const wrapperStyle = codeBlockStyleToCss(node.style);
   const hasExplicitHeight = Boolean(node.style?.height);
-  const wrapperClass = hasExplicitHeight
+  const isRunnableEditable = Boolean(node.editable && node.runnable);
+  const useFixedWrapperHeight = hasExplicitHeight && !isRunnableEditable;
+  const normalizedWrapperStyle: React.CSSProperties = { ...wrapperStyle };
+  if (isRunnableEditable && hasExplicitHeight) {
+    // For runnable editors, height should limit editor viewport only.
+    // The wrapper must grow to include the run button + console and avoid overlap.
+    delete normalizedWrapperStyle.height;
+  }
+  const wrapperClass = useFixedWrapperHeight
     ? `${styles.wrapper} ${styles.wrapperFixedHeight}`
     : styles.wrapper;
-  const readOnlyWrapperClass = hasExplicitHeight
+  const readOnlyWrapperClass = useFixedWrapperHeight
     ? `${styles.codeBlockWrapper} ${styles.wrapperFixedHeight}`
     : styles.codeBlockWrapper;
 
@@ -113,7 +121,7 @@ export const CodeNode: React.FC<Props> = ({ node }) => {
     return (
       <div
         className={readOnlyWrapperClass}
-        style={Object.keys(wrapperStyle).length > 0 ? wrapperStyle : undefined}
+        style={Object.keys(normalizedWrapperStyle).length > 0 ? normalizedWrapperStyle : undefined}
       >
         <div
           className={styles.readOnlyEditorContainer}
@@ -152,12 +160,14 @@ export const CodeNode: React.FC<Props> = ({ node }) => {
   return (
     <div
       className={wrapperClass}
-      style={Object.keys(wrapperStyle).length > 0 ? wrapperStyle : undefined}
+      style={Object.keys(normalizedWrapperStyle).length > 0 ? normalizedWrapperStyle : undefined}
     >
       <div
         className={styles.editorContainer}
         style={{
+          flex: hasExplicitHeight ? 'none' : undefined,
           minHeight: hasExplicitHeight ? undefined : `${minHeightEm}em`,
+          ...(isRunnableEditable && hasExplicitHeight && { height: node.style?.height }),
           overflow: hasExplicitHeight ? 'auto' : undefined,
         }}
       >
