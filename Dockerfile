@@ -4,32 +4,31 @@ WORKDIR /app
   
 ARG VITE_CPP_COMPILER_URL
 ENV VITE_CPP_COMPILER_URL=${VITE_CPP_COMPILER_URL}
-
+  
 COPY package*.json ./
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci
+  npm ci
   
 COPY . .
 RUN npm run build
-
+  
 FROM nginx:alpine AS runtime
-
+  
 ENV PORT=5000
-
-RUN addgroup -g 1001 -S nginx && \
-    adduser -S nginx -u 1001 -G nginx
-
+  
+LABEL maintainer="rebbit123456@gmail.com"
+LABEL version="1.0.0"
+LABEL description="Present Flow Frontend"
+  
 COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template
-
 COPY --from=build /app/dist /usr/share/nginx/html
-
-RUN chown -R nginx:nginx /usr/share/nginx/html && \
-    chown -R nginx:nginx /var/cache/nginx && \
-    chown -R nginx:nginx /var/log/nginx && \
-    chown -R nginx:nginx /etc/nginx/conf.d && \
+RUN chown -R 101:101 /usr/share/nginx/html && \
+    chown -R 101:101 /var/cache/nginx && \
+    chown -R 101:101 /var/log/nginx && \
+    chown -R 101:101 /etc/nginx/conf.d && \
     touch /var/run/nginx.pid && \
-    chown -R nginx:nginx /var/run/nginx.pid
-
+    chown -R 101:101 /var/run/nginx.pid
+  
 USER nginx
 
 EXPOSE 5000
