@@ -15,6 +15,8 @@ RUN npm run build
 FROM nginx:alpine AS runtime
   
 ENV PORT=5000
+
+RUN apk add --no-cache wget
   
 LABEL maintainer="rebbit123456@gmail.com"
 LABEL version="1.0.0"
