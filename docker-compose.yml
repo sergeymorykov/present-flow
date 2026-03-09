@@ -5,10 +5,6 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_CPP_COMPILER_URL: ${VITE_CPP_COMPILER_URL:?VITE_CPP_COMPILER_URL is required in .env}
-      cache_from:
-        - present-flow:buildcache
-      cache_to:
-        - present-flow:buildcache
     container_name: present-flow
     image: present-flow:${VERSION:-latest}
     environment:
