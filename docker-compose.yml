@@ -5,10 +5,33 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_CPP_COMPILER_URL: ${VITE_CPP_COMPILER_URL:?VITE_CPP_COMPILER_URL is required in .env}
+      cache_from:
+        - present-flow:buildcache
+      cache_to:
+        - present-flow:buildcache
     container_name: present-flow
+    image: present-flow:${VERSION:-latest}
     environment:
       PORT: 5000
     ports:
       - "5000:5000"
     restart: unless-stopped
-
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M

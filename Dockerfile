@@ -1,34 +1,40 @@
-# syntax=docker/dockerfile:1
-
-# ---- Build stage: compile Vite app into /dist ----
 FROM node:20-alpine AS build
 
 WORKDIR /app
-
-# Vite reads VITE_* only at build time
+  
 ARG VITE_CPP_COMPILER_URL
 ENV VITE_CPP_COMPILER_URL=${VITE_CPP_COMPILER_URL}
 
-# Install dependencies using lockfile for reproducible builds
 COPY package*.json ./
-RUN npm ci
-
-# Copy source and build production bundle
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci
+  
 COPY . .
 RUN npm run build
 
-
-# ---- Runtime stage: lightweight static server ----
 FROM nginx:alpine AS runtime
 
-# Default port for internal HTTP traffic (host handles HTTPS)
 ENV PORT=5000
 
-# Use nginx template + env var to keep port configurable
+RUN addgroup -g 1001 -S nginx && \
+    adduser -S nginx -u 1001 -G nginx
+
 COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template
 
-# Copy only built static files
 COPY --from=build /app/dist /usr/share/nginx/html
+
+RUN chown -R nginx:nginx /usr/share/nginx/html && \
+    chown -R nginx:nginx /var/cache/nginx && \
+    chown -R nginx:nginx /var/log/nginx && \
+    chown -R nginx:nginx /etc/nginx/conf.d && \
+    touch /var/run/nginx.pid && \
+    chown -R nginx:nginx /var/run/nginx.pid
+
+USER nginx
 
 EXPOSE 5000
 
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD wget -q --spider http://localhost:5000/ || exit 1
+
+STOPSIGNAL SIGQUIT

@@ -1,5 +1,6 @@
 # Dependencies
 node_modules
+npm-debug.log
 
 # Build output
 dist
@@ -8,16 +9,21 @@ coverage
 # VCS
 .git
 .gitignore
+.gitattributes
 
 # Environment / local configs
 .env
 .env.*
 !.env.example
+.env.local
+.env.production
 
 # IDE / editor
 .idea
 .vscode
 .cursor
+*.swp
+*.swo
 
 # Logs
 *.log
@@ -25,8 +31,30 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+logs
 
 # OS files
 .DS_Store
 Thumbs.db
+*.orig
 
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+*.md
+README*
+LICENSE
+docs
+
+# Tests
+__tests__
+*.test.js
+*.spec.js
+jest.config.*
+
+# Build cache
+.cache
+.parcel-cache
