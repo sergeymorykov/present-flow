@@ -27,6 +27,7 @@ type SyntaxRegistry = {
   };
   blockDirectives: {
     end: string;
+    step: string;
     style: string;
     fragment: string;
     columns: string;

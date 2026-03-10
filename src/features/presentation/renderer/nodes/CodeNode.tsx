@@ -46,11 +46,13 @@ const executeJs = (code: string): string => {
   return lines.join('\n') || '(нет вывода)';
 };
 
-type Props = { node: CodeNodeType };
+type Props = { node: CodeNodeType; activeStep?: number };
 
-export const CodeNode: React.FC<Props> = ({ node }) => {
+export const CodeNode: React.FC<Props> = ({ node, activeStep }) => {
+  const step = activeStep ?? 0;
+  const currentCode = node.steps[step] ?? '';
   // useRef ensures handleRun always reads the latest code without stale closures
-  const codeRef = useRef<string>(node.code);
+  const codeRef = useRef<string>(currentCode);
   const [output, setOutput] = useState<string>(IDLE_MESSAGE);
   const [isError, setIsError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -98,7 +100,7 @@ export const CodeNode: React.FC<Props> = ({ node }) => {
     setIsLoading(false);
   }, [node.language, node.runtimeLanguage]);
 
-  const lineCount = Math.max(1, node.code.split('\n').length);
+  const lineCount = Math.max(1, currentCode.split('\n').length);
   const minHeightEm = lineCount * LINE_HEIGHT_EM;
   const wrapperStyle = codeBlockStyleToCss(node.style);
   const hasExplicitHeight = Boolean(node.style?.height);
@@ -132,7 +134,8 @@ export const CodeNode: React.FC<Props> = ({ node }) => {
           }}
         >
           <Editor
-            defaultValue={node.code}
+            key={step}
+            defaultValue={currentCode}
             language={node.language}
             readOnly
             onChange={() => {}}
@@ -172,7 +175,8 @@ export const CodeNode: React.FC<Props> = ({ node }) => {
         }}
       >
         <Editor
-          defaultValue={node.code}
+          key={step}
+          defaultValue={currentCode}
           language={node.language}
           onChange={handleChange}
         />

@@ -2,6 +2,7 @@ import React from 'react';
 import { ContentSlide as ContentSlideType } from '../../parser/types';
 import { NodeRenderer } from '../NodeRenderer';
 import { ColumnsNode } from './ColumnsNode';
+import { CodeNode } from './CodeNode';
 import { FragmentNode } from './FragmentNode';
 import { StyledBlock } from './StyledBlock';
 import { NoteNodeComponent } from './NoteNode';
@@ -56,6 +57,16 @@ export const ContentSlide: React.FC<Props> = ({ slide, visibleFragments }) => {
               fragmentCounter={fragmentCounter}
             />
           );
+        }
+        if (node.type === 'code' && node.steps.length > 1) {
+          const startFragment = fragmentCounter.current;
+          const stepCount = node.steps.length;
+          const activeStep = Math.min(
+            Math.max(0, visibleFragments - startFragment),
+            stepCount - 1
+          );
+          fragmentCounter.current += stepCount - 1;
+          return <CodeNode key={i} node={node} activeStep={activeStep} />;
         }
         return <NodeRenderer key={i} node={node} />;
       })}

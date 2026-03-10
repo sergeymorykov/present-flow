@@ -11,6 +11,7 @@ type Props = { slides: Slide[] };
 const countFragmentsInNodes = (nodes: SlideNode[]): number =>
   nodes.reduce((sum, n) => {
     if (n.type === 'fragment') return sum + 1;
+    if (n.type === 'code' && n.steps.length > 1) return sum + (n.steps.length - 1);
     if (n.type === 'styled') return sum + countFragmentsInNodes(n.children);
     return sum;
   }, 0);

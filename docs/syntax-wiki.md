@@ -19,7 +19,7 @@
 | `@style` | `@style ... @end` | Стилизованный контейнер для дочернего контента. |
 | `@fragment` | `@fragment ... @end` | Фрагмент, который появляется по шагам. |
 | `@columns/@column` | `@columns ... @column ... @column ... @end` | Макет из колонок с индивидуальными стилями. |
-| `@code` | `@code [language] [editable\|readonly] [width=...] [height=...] [run=lang] [highlight=lineNum:color,]` | Блок кода, включая запуск JS/TS и C/C++. |
+| `@code` | `@code [language] [editable\|readonly] [width=...] [height=...] [run=lang] [highlight=lineNum:color,] ... [@step ...] @end` | Блок кода с опциональными шагами раскрытия (разделяются `@step`). |
 | `@table` | `@table [noborder] [width=...] [height=...] ... @end` | Markdown-таблица с опциональными рамками и размерами. |
 | `@note/@warning/@important` | `@note [label] ... @end` | Блоки заметок с вариантами note/warning/important. |
 | `@tip` | `@tip [label] ... @end` | Блок подсказки с акцентом на практические рекомендации. |
@@ -145,6 +145,26 @@ Present Flow
 @code js editable run=js height=180px
 const sum = (a, b) => a + b;
 console.log('2 + 3 =', sum(2, 3));
+@end
+```
+
+### @code с @step (пошаговое раскрытие)
+
+```presentation-demo
+@code cpp readonly
+#include <iostream>
+@step
+#include <iostream>
+
+int main() {
+
+}
+@step
+#include <iostream>
+
+int main() {
+  std::cout << "Hello, world!" << std::endl;
+}
 @end
 ```
 

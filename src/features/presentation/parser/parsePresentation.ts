@@ -52,7 +52,7 @@ const parseVideoDirective = (line: string): VideoNode => {
 
 const RESERVED_CODE_TOKENS = new Set(['editable', 'readonly']);
 
-const parseCodeDirective = (line: string): Omit<CodeNode, 'code'> => {
+const parseCodeDirective = (line: string): Omit<CodeNode, 'steps'> => {
   const raw = line.slice(SYNTAX_REGISTRY.blockDirectives.code.length).trim();
   const parts = raw.split(/\s+/).filter(Boolean);
   const readonly = parts.includes('readonly');
@@ -333,14 +333,18 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       flushTextBuffer(textBuffer, nodes, nextListStyle);
       nextListStyle = undefined;
       const attrs = parseCodeDirective(line);
-      const codeLines: string[] = [];
+      const codeSteps: string[][] = [[]];
       i++;
       while (i < lines.length && !BLOCK_END.test(lines[i])) {
-        codeLines.push(lines[i]);
+        if (lines[i].trim() === SYNTAX_REGISTRY.blockDirectives.step) {
+          codeSteps.push([]);
+        } else {
+          codeSteps[codeSteps.length - 1].push(lines[i]);
+        }
         i++;
       }
       if (BLOCK_END.test(lines[i] ?? '')) i++;
-      const node: CodeNode = { ...attrs, code: codeLines.join('\n') };
+      const node: CodeNode = { ...attrs, steps: codeSteps.map((s) => s.join('\n')) };
       nodes.push(node);
       continue;
     }
