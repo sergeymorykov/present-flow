@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { CodeNode as CodeNodeType } from '../../parser/types';
 import { Editor } from '@/monaco/Editor';
 import { Range } from 'monaco-editor';
@@ -56,6 +56,11 @@ export const CodeNode: React.FC<Props> = ({ node, activeStep }) => {
   const [output, setOutput] = useState<string>(IDLE_MESSAGE);
   const [isError, setIsError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [editorContentHeight, setEditorContentHeight] = useState<number | null>(null);
+
+  useEffect(() => {
+    setEditorContentHeight(null);
+  }, [step]);
 
   const handleChange = useCallback((value: string) => {
     codeRef.current = value;
@@ -120,15 +125,26 @@ export const CodeNode: React.FC<Props> = ({ node, activeStep }) => {
     : styles.codeBlockWrapper;
 
   if (!node.editable) {
+    const containerHeight = hasExplicitHeight
+      ? undefined
+      : editorContentHeight != null
+        ? `${editorContentHeight}px`
+        : `${minHeightEm}em`;
+
+    const readOnlyWrapperStyle: React.CSSProperties = {
+      ...normalizedWrapperStyle,
+      ...(!hasExplicitHeight && { flex: 'none' }),
+    };
+
     return (
       <div
         className={readOnlyWrapperClass}
-        style={Object.keys(normalizedWrapperStyle).length > 0 ? normalizedWrapperStyle : undefined}
+        style={readOnlyWrapperStyle}
       >
         <div
           className={styles.readOnlyEditorContainer}
           style={{
-            height: hasExplicitHeight ? undefined : `${minHeightEm}em`,
+            height: containerHeight,
             flex: hasExplicitHeight ? undefined : 'none',
             overflow: hasExplicitHeight ? 'auto' : undefined,
           }}
@@ -143,8 +159,11 @@ export const CodeNode: React.FC<Props> = ({ node, activeStep }) => {
               lineNumbers: node.showLines ? "on" : "off"
             }}
             onMount={(editor) => {
-              // Create the collection
-              const decorations = editor.createDecorationsCollection(
+              const updateHeight = () => setEditorContentHeight(editor.getContentHeight() + 12);
+              editor.onDidContentSizeChange(updateHeight);
+              updateHeight();
+
+              editor.createDecorationsCollection(
                 node.highlight?.map(h => ({
                   range: new Range(h.lineNumber, 1, h.lineNumber, 1),
                   options: {
