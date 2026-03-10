@@ -36,6 +36,28 @@
   justify-content: center;
   overflow-y: auto;
   animation: slideIn 0.25s ease forwards;
+  
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: #3a3a5c transparent;
+}
+
+/* WebKit (Chrome, Safari, Edge) */
+.slide::-webkit-scrollbar {
+  width: 6px;
+}
+
+.slide::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.slide::-webkit-scrollbar-thumb {
+  background-color: #3a3a5c;
+  border-radius: 10px;
+}
+
+.slide::-webkit-scrollbar-thumb:hover {
+  background-color: #00d9ff;
 }
 
 .slideNoScroll {
