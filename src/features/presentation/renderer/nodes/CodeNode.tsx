@@ -50,7 +50,9 @@ type Props = { node: CodeNodeType; activeStep?: number };
 
 export const CodeNode: React.FC<Props> = ({ node, activeStep }) => {
   const step = activeStep ?? 0;
-  const currentCode = node.steps[step] ?? '';
+  const currentStep = node.steps[step];
+  const currentCode = currentStep?.code ?? '';
+  const currentHighlight = currentStep?.highlight;
   // useRef ensures handleRun always reads the latest code without stale closures
   const codeRef = useRef<string>(currentCode);
   const [output, setOutput] = useState<string>(IDLE_MESSAGE);
@@ -164,7 +166,7 @@ export const CodeNode: React.FC<Props> = ({ node, activeStep }) => {
               updateHeight();
 
               editor.createDecorationsCollection(
-                node.highlight?.map(h => ({
+                currentHighlight?.map(h => ({
                   range: new Range(h.lineNumber, 1, h.lineNumber, 1),
                   options: {
                     isWholeLine: true,

@@ -63,9 +63,8 @@ export type CodeNode = {
   readonly?: boolean;
   runnable: boolean;
   runtimeLanguage?: string;
-  steps: string[];
+  steps: { code: string; highlight?: { lineNumber: number; color: string }[] }[];
   style?: BlockStyle;
-  highlight?: { lineNumber: number, color: string}[]
   showLines?: boolean;
 };
 

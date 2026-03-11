@@ -52,7 +52,15 @@ const parseVideoDirective = (line: string): VideoNode => {
 
 const RESERVED_CODE_TOKENS = new Set(['editable', 'readonly']);
 
-const parseCodeDirective = (line: string): Omit<CodeNode, 'steps'> => {
+const parseHighlight = (parts: string[]) => {
+  const highlightPart = parts.find((p) => p.startsWith('highlight='));
+  return highlightPart?.split('=')[1].split(',').map(item => {
+    const [lineNum, color] = item.split(':');
+    return { lineNumber: +lineNum, color };
+  });
+};
+
+const parseCodeDirective = (line: string): Omit<CodeNode, 'steps'> & { _highlight: ReturnType<typeof parseHighlight> } => {
   const raw = line.slice(SYNTAX_REGISTRY.blockDirectives.code.length).trim();
   const parts = raw.split(/\s+/).filter(Boolean);
   const readonly = parts.includes('readonly');
@@ -61,11 +69,6 @@ const parseCodeDirective = (line: string): Omit<CodeNode, 'steps'> => {
   const runPart = parts.find((p) => p.startsWith('run='));
   const runnable = Boolean(runPart);
   const runtimeLanguage = runPart ? runPart.slice(4) : undefined;
-  const highlightPart = parts.find((p) => p.startsWith('highlight='));
-  const highlight = highlightPart?.split('=')[1].split(',').map(item => {
-    const [line, color] = item.split(':');
-    return { lineNumber: +line, color };
-  })
 
   const showLines = parts.includes('showLines');
 
@@ -95,7 +98,7 @@ const parseCodeDirective = (line: string): Omit<CodeNode, 'steps'> => {
     runnable,
     runtimeLanguage,
     ...(style && { style }),
-    highlight,
+    _highlight: parseHighlight(parts),
     showLines,
   };
 };
@@ -332,19 +335,25 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
     if (line.startsWith(SYNTAX_REGISTRY.blockDirectives.code)) {
       flushTextBuffer(textBuffer, nodes, nextListStyle);
       nextListStyle = undefined;
-      const attrs = parseCodeDirective(line);
-      const codeSteps: string[][] = [[]];
+      const { _highlight, ...attrs } = parseCodeDirective(line);
+      type StepAccum = { lines: string[]; highlight: ReturnType<typeof parseHighlight> };
+      const codeSteps: StepAccum[] = [{ lines: [], highlight: _highlight }];
       i++;
       while (i < lines.length && !BLOCK_END.test(lines[i])) {
-        if (lines[i].trim() === SYNTAX_REGISTRY.blockDirectives.step) {
-          codeSteps.push([]);
+        const raw = lines[i];
+        if (raw.trimStart().startsWith(SYNTAX_REGISTRY.blockDirectives.step)) {
+          const stepParts = raw.trim().split(/\s+/).slice(1);
+          codeSteps.push({ lines: [], highlight: parseHighlight(stepParts) });
         } else {
-          codeSteps[codeSteps.length - 1].push(lines[i]);
+          codeSteps[codeSteps.length - 1].lines.push(raw);
         }
         i++;
       }
       if (BLOCK_END.test(lines[i] ?? '')) i++;
-      const node: CodeNode = { ...attrs, steps: codeSteps.map((s) => s.join('\n')) };
+      const node: CodeNode = {
+        ...attrs,
+        steps: codeSteps.map((s) => ({ code: s.lines.join('\n'), highlight: s.highlight })),
+      };
       nodes.push(node);
       continue;
     }
