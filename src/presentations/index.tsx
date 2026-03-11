@@ -57,6 +57,16 @@ const lecture7Presentations: PresentationConfig[] = [
         default: m.PresentationLecture8,
       }))
     ),
+  },
+  {
+    id: 'lecture7-iteratirs',
+    title: 'Лекция 7: Итераторы',
+    description: 'Шаблоны (продолжение) и итераторы в C++',
+    component: lazy(() =>
+      import('./lecture7/PresentationLecture7').then((m) => ({
+        default: m.PresentationLecture7,
+      }))
+    ),
   }
 ];
 
