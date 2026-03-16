@@ -37,6 +37,7 @@ type SyntaxRegistry = {
     imagePrefix: string;
     videoPrefix: string;
     divider: string;
+    presenter: string;
   };
   noteVariants: string[];
   styleCommands: StyleCommandRegistryEntry[];

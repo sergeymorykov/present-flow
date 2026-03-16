@@ -332,6 +332,17 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       continue;
     }
 
+    if (line.trim() === SYNTAX_REGISTRY.blockDirectives.presenter) {
+      flushTextBuffer(textBuffer, nodes, nextListStyle);
+      nextListStyle = undefined;
+      i++;
+      while (i < lines.length && !BLOCK_END.test(lines[i])) {
+        i++;
+      }
+      if (BLOCK_END.test(lines[i] ?? '')) i++;
+      continue;
+    }
+
     if (line.startsWith(SYNTAX_REGISTRY.blockDirectives.code)) {
       flushTextBuffer(textBuffer, nodes, nextListStyle);
       nextListStyle = undefined;

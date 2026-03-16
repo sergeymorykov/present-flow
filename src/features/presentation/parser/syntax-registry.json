@@ -17,7 +17,8 @@
     "table": "@table",
     "imagePrefix": "@image ",
     "videoPrefix": "@video ",
-    "divider": "@divider"
+    "divider": "@divider",
+    "presenter": "@presenter"
   },
   "noteVariants": ["note", "warning", "tip", "important"],
   "styleCommands": [
@@ -214,6 +215,13 @@
       "syntax": "@divider [color]",
       "description": "Горизонтальный разделитель.",
       "demo": "Текст до разделителя\n@divider #22c55e\nТекст после разделителя"
+    },
+    {
+      "kind": "block",
+      "tag": "@presenter",
+      "syntax": "@presenter ... @end",
+      "description": "Заметка для презентера, не отображается на слайде.",
+      "demo": "@presenter\nЗдесь можно написать подсказку для выступающего.\n@end"
     },
     {
       "kind": "inline",
