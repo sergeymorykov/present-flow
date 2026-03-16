@@ -77,7 +77,7 @@ export type TableNode = {
 
 export type FragmentNode = {
   type: 'fragment';
-  content: string;
+  children: SlideNode[];
   style?: BlockStyle;
 };
 

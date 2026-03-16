@@ -373,7 +373,7 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       const styleFrag = parseBlockStyle(styleLinesFrag);
       const node: FragmentNode = {
         type: 'fragment',
-        content: contentLinesFrag.join('\n').trim(),
+        children: parseSlideContent(contentLinesFrag),
         style: styleFrag,
       };
       nodes.push(node);
