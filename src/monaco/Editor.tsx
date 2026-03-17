@@ -3,6 +3,7 @@ import MonacoEditor from '@monaco-editor/react';
 import type { editor as MonacoEditorNS } from 'monaco-editor';
 import styles from './Editor.module.css';
 import asmDef from './asmMode';
+import cppDef from './cppMode';
 import presentationMarkdownDef from './presentationMarkdown';
 
 const EDITOR_OPTIONS = {
@@ -47,6 +48,8 @@ export const Editor: React.FC<EditorProps> = ({
       monaco.languages.register({ id: 'presentation-markdown' });
       monaco.languages.setMonarchTokensProvider('presentation-markdown', presentationMarkdownDef);
     }
+    // Override built-in C++ grammar to add STL type highlighting
+    monaco.languages.setMonarchTokensProvider('cpp', cppDef);
   };
 
   const handleChange = useCallback(
