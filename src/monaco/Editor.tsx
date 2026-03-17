@@ -3,6 +3,7 @@ import MonacoEditor from '@monaco-editor/react';
 import type { editor as MonacoEditorNS } from 'monaco-editor';
 import styles from './Editor.module.css';
 import asmDef from './asmMode';
+import presentationMarkdownDef from './presentationMarkdown';
 
 const EDITOR_OPTIONS = {
   fontSize: 14,
@@ -30,7 +31,7 @@ type EditorProps = {
 export const Editor: React.FC<EditorProps> = ({
   value,
   defaultValue,
-  language = 'markdown',
+  language = 'presentation-markdown',
   onChange,
   readOnly = false,
   onMount,
@@ -41,6 +42,10 @@ export const Editor: React.FC<EditorProps> = ({
     if (!monaco.languages.getLanguages().some((lang: any) => lang.id === 'asm')) {
       monaco.languages.register({ id: 'asm' });
       monaco.languages.setMonarchTokensProvider('asm', asmDef);
+    }
+    if (!monaco.languages.getLanguages().some((lang: any) => lang.id === 'presentation-markdown')) {
+      monaco.languages.register({ id: 'presentation-markdown' });
+      monaco.languages.setMonarchTokensProvider('presentation-markdown', presentationMarkdownDef);
     }
   };
 

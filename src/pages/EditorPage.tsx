@@ -470,7 +470,7 @@ const EditorPageContent: React.FC = () => {
           <div className={styles.editorPanel}>
             <Editor
               value={markdown}
-              language="markdown"
+              language="presentation-markdown"
               onChange={handleMarkdownChange}
               onMount={handleEditorMount}
               options={{
@@ -492,7 +492,7 @@ const EditorPageContent: React.FC = () => {
         <div className={styles.editorOnly}>
           <Editor
             value={markdown}
-            language="markdown"
+            language="presentation-markdown"
             onChange={handleMarkdownChange}
             onMount={handleEditorMount}
             options={{

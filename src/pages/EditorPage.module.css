@@ -66,9 +66,12 @@
 }
 
 .previewPanel {
-  flex: 1;
+  aspect-ratio: 16 / 9;
   min-width: 0;
   overflow: hidden;
+  flex: none;
+  height: 100%;
+  max-width: 100%;
 }
 
 .fullPreview {
