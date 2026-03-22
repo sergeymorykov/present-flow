@@ -67,6 +67,16 @@ const lecture7Presentations: PresentationConfig[] = [
         default: m.PresentationLecture7,
       }))
     ),
+  },
+  {
+    id: 'lecture9-smart-pointers',
+    title: 'Лекция 9: Умные указатели',
+    description: 'Современное управление памятью в C++',
+    component: lazy(() =>
+      import('./lecture9/PresentationLecture9').then((m) => ({
+        default: m.PresentationLecture9,
+      }))
+    ),
   }
 ];
 
