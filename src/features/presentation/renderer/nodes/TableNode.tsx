@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import { TableNode as TableNodeType } from '../../parser/types';
 import styles from './TableNode.module.css';
 
@@ -36,7 +37,7 @@ export const TableNode: React.FC<Props> = ({ node }) => {
           <thead>
             <tr>
               {headerRow.map((cell, i) => (
-                <th key={i}>{cell}</th>
+                <th key={i}><ReactMarkdown>{cell}</ReactMarkdown></th>
               ))}
             </tr>
           </thead>
@@ -45,7 +46,7 @@ export const TableNode: React.FC<Props> = ({ node }) => {
           {bodyRows.map((row, ri) => (
             <tr key={ri}>
               {row.map((cell, ci) => (
-                <td key={ci}>{cell}</td>
+                <td key={ci}><ReactMarkdown>{cell}</ReactMarkdown></td>
               ))}
             </tr>
           ))}
