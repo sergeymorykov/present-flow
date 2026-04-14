@@ -46,8 +46,23 @@ const parseImageDirective = (line: string): ImageNode => {
 const parseVideoDirective = (line: string): VideoNode => {
   const parts = line.slice(SYNTAX_REGISTRY.blockDirectives.videoPrefix.trim().length).trim().split(/\s+/);
   const src = parts[0] ?? '';
-  const fullSlide = parts.slice(1).some((p) => p.toLowerCase() === 'fullslide');
-  return { type: 'video', src, ...(fullSlide && { fullSlide: true }) };
+  const flags = parts.slice(1).map((p) => p.toLowerCase());
+  const fullSlide = flags.some((p) => p === 'fullslide');
+  const node: VideoNode = { type: 'video', src, ...(fullSlide && { fullSlide: true }) };
+  const hasNoAutoplay = flags.includes('noautoplay');
+  const hasNoMuted = flags.includes('nomuted');
+  const hasNoLoop = flags.includes('noloop');
+  const hasNoControls = flags.includes('nocontrols');
+  if (hasNoAutoplay) node.autoplay = false;
+  if (hasNoMuted) node.muted = false;
+  if (hasNoLoop) node.loop = false;
+  if (hasNoControls) node.controls = false;
+  const speedPart = parts.slice(1).find((p) => p.toLowerCase().startsWith('speed='));
+  if (speedPart) {
+    const rate = parseFloat(speedPart.split('=')[1]);
+    if (!isNaN(rate) && rate > 0) node.playbackRate = rate;
+  }
+  return node;
 };
 
 const RESERVED_CODE_TOKENS = new Set(['editable', 'readonly']);

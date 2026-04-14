@@ -53,6 +53,11 @@ export type VideoNode = {
   src: string;
   /** Растянуть видео на весь слайд (object-fit: cover) */
   fullSlide?: boolean;
+  autoplay?: boolean;
+  muted?: boolean;
+  loop?: boolean;
+  controls?: boolean;
+  playbackRate?: number;
 };
 
 export type CodeNode = {
