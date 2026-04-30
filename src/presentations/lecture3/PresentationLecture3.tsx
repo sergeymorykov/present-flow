@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { SlideRenderer } from '@/features/presentation/renderer/SlideRenderer';
 import { parsePresentation } from '@/features/presentation/parser/parsePresentation';
-import markdownContent from './lecture3.md?raw';
+import markdownContent from './presentation.md?raw';
 
 import aqtReleasesImg from './assets/aqt_releases.png';
 import introVid from './assets/intro.mp4';

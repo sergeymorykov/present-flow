@@ -38,6 +38,43 @@
 
 .date {
   font-size: 1rem;
-  color: #7070a0;
-  margin: 0;
+  color: #64748b;
+  margin-top: 1rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.items {
+  list-style: none;
+  padding: 0;
+  margin: 2rem 0;
+  font-size: 1.25rem;
+  color: #334155;
+  text-align: left;
+  display: inline-block;
+}
+
+.items li {
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+}
+
+.items li::before {
+  content: "•";
+  color: #3b82f6;
+  font-weight: bold;
+  display: inline-block;
+  width: 1.5em;
 }

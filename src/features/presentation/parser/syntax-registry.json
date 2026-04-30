@@ -3,6 +3,10 @@
   "slideDirectives": {
     "title": "@title",
     "sectionPrefix": "@section ",
+    "category": "@category ",
+    "subtitle": "@subtitle ",
+    "badge": "@badge ",
+    "items": "@items",
     "yesScroll": "@yesScroll",
     "noScroll": "@noScroll"
   },
@@ -18,7 +22,9 @@
     "imagePrefix": "@image ",
     "videoPrefix": "@video ",
     "divider": "@divider",
-    "presenter": "@presenter"
+    "presenter": "@presenter",
+    "badgeRow": "@badge-row",
+    "diagram": "@diagram"
   },
   "noteVariants": ["note", "warning", "tip", "important"],
   "styleCommands": [

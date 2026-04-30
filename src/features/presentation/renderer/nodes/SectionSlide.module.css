@@ -7,9 +7,20 @@
 }
 
 .title {
-  font-size: 2.4rem;
-  font-weight: 600;
-  color: #a0e0ff;
-  border-bottom: 3px solid #00d9ff;
-  padding-bottom: 0.75rem;
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.subtitle {
+  font-size: 1.5rem;
+  color: #64748b;
+  margin-top: 1.5rem;
+}
+
+.icon {
+  font-size: 4rem;
+  margin-bottom: 2rem;
 }

@@ -16,8 +16,16 @@ export const TitleSlide: React.FC<Props> = ({ slide }) => {
   const titleStyle = s?.fontSize ? { fontSize: s.fontSize } : undefined;
   return (
     <div className={styles.slide} style={slideStyle}>
+      {slide.badge && <div className={styles.badge}>{slide.badge}</div>}
       <h1 className={styles.title} style={titleStyle}>{slide.title}</h1>
       {slide.subtitle && <p className={styles.subtitle}>{slide.subtitle}</p>}
+      {slide.items && (
+        <ul className={styles.items}>
+          {slide.items.map((item, idx) => (
+            <li key={idx}>{item}</li>
+          ))}
+        </ul>
+      )}
       {slide.author && <p className={styles.author}>{slide.author}</p>}
       {slide.affiliation && <p className={styles.affiliation}>{slide.affiliation}</p>}
       {slide.date && <p className={styles.date}>{slide.date}</p>}

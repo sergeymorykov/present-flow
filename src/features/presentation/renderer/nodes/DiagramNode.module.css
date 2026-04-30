@@ -1,0 +1,31 @@
+.diagram {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+  overflow: visible;
+}
+
+.diagram :global(svg) {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Глобальные стили для элементов внутри диаграмм */
+.diagram :global(.hl) { color: #6495ed; font-weight: bold; }
+.diagram :global(.hl2) { color: #4ade80; font-weight: bold; }
+.diagram :global(.hl3) { color: #facc15; font-weight: bold; }
+.diagram :global(.hl4) { color: #c793ff; font-weight: bold; }
+.diagram :global(.dim) { color: #666; }
+
+.diagram :global(.label) {
+  display: inline-block;
+  padding: 2px 8px;
+  background: rgba(100, 149, 237, 0.15);
+  border: 1px solid rgba(100, 149, 237, 0.3);
+  border-radius: 4px;
+  color: #6495ed;
+  font-size: 0.9em;
+  font-weight: bold;
+}

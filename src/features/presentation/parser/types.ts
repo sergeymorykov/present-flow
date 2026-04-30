@@ -1,3 +1,20 @@
+export type BadgeRowItem = {
+  text: string;
+  color?: string;
+};
+
+export type BadgeRowNode = {
+  type: 'badge-row';
+  items: BadgeRowItem[];
+  style?: BlockStyle;
+};
+
+export type DiagramNode = {
+  type: 'diagram';
+  value: string;
+  style?: BlockStyle;
+};
+
 export type BlockStyle = {
   textAlign?: 'left' | 'center' | 'right';
   marginTop?: string;
@@ -25,12 +42,16 @@ export type TitleSlide = {
   author?: string;
   affiliation?: string;
   date?: string;
+  badge?: string;
+  items?: string[];
   style?: BlockStyle;
 };
 
 export type SectionSlide = {
   type: 'section';
   title: string;
+  subtitle?: string;
+  icon?: string;
   style?: BlockStyle;
 };
 
@@ -99,6 +120,7 @@ export type ColumnsNode = {
 export type ContentSlide = {
   type: 'content';
   nodes: SlideNode[];
+  category?: string;
   /** Включить скролл (по умолчанию контент обрезается без скролла) */
   scroll?: boolean;
 };
@@ -134,7 +156,9 @@ export type SlideNode =
   | ColumnsNode
   | StyledBlockNode
   | NoteNode
-  | DividerNode;
+  | DividerNode
+  | BadgeRowNode
+  | DiagramNode;
 
 export type ErrorSlide = {
   type: 'error';

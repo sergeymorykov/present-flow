@@ -53,8 +53,8 @@ const lecture7Presentations: PresentationConfig[] = [
     title: 'Лекция 6: Алгоритмы и контейнеры STL',
     description: 'Практика по std::algorithm и контейнерам STL с runnable C++ примерами.',
     component: lazy(() =>
-      import('./lecture8/PresentationLecture8').then((m) => ({
-        default: m.PresentationLecture8,
+      import('./lecture6/PresentationLecture6').then((m) => ({
+        default: m.PresentationLecture6,
       }))
     ),
   },
@@ -65,6 +65,16 @@ const lecture7Presentations: PresentationConfig[] = [
     component: lazy(() =>
       import('./lecture7/PresentationLecture7').then((m) => ({
         default: m.PresentationLecture7,
+      }))
+    ),
+  },
+  {
+    id: 'lecture8-algorithms-containers',
+    title: 'Лекция 8: Алгоритмы и Контейнеры C++ STL',
+    description: 'Полный обзор ключевых алгоритмов и структур данных',
+    component: lazy(() =>
+      import('./lecture8/PresentationLecture8').then((m) => ({
+        default: m.PresentationLecture8,
       }))
     ),
   },
@@ -89,6 +99,16 @@ const lecture7Presentations: PresentationConfig[] = [
     ),
   },
   {
+    id: 'lecture12-coroutines',
+    title: 'Лекция 12: C++ Coroutines: Fundamentals',
+    description: 'Основы корутин в C++20: co_await, co_yield, co_return',
+    component: lazy(() =>
+      import('./lecture12/PresentationLecture12').then((m) => ({
+        default: m.PresentationLecture12,
+      }))
+    ),
+  },
+  {
     id: 'lecture13-multithreading',
     title: 'Лекция 13: Многопоточность',
     description: 'Процессы, потоки, std::thread',
@@ -99,12 +119,32 @@ const lecture7Presentations: PresentationConfig[] = [
     ),
   },
   {
+    id: 'lecture14-qt-multithreading',
+    title: 'Лекция 14: Асинхронность и многопоточность в Qt',
+    description: 'Практический подход на примере расчета ряда Фурье',
+    component: lazy(() =>
+      import('./lecture14/PresentationLecture14').then((m) => ({
+        default: m.PresentationLecture14,
+      }))
+    ),
+  },
+  {
     id: 'lecture15-multithreading-part-2',
     title: 'Лекция 15: Многопоточность',
     description: 'Race condition, std::mutex и т.п.',
     component: lazy(() =>
       import('./lecture15/PresentationLecture15').then((m) => ({
         default: m.PresentationLecture15,
+      }))
+    ),
+  },
+  {
+    id: 'lecture16-parallel-algorithms',
+    title: 'Лекция 16: Параллелизм в C++',
+    description: 'От std::thread до параллельных алгоритмов STL',
+    component: lazy(() =>
+      import('./lecture16/PresentationLecture16').then((m) => ({
+        default: m.PresentationLecture16,
       }))
     ),
   },

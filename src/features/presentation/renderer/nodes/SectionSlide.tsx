@@ -16,7 +16,9 @@ export const SectionSlide: React.FC<Props> = ({ slide }) => {
   };
   return (
     <div className={styles.slide} style={slideStyle}>
+      {slide.icon && <div className={styles.icon}>{slide.icon}</div>}
       <h2 className={styles.title}>{slide.title}</h2>
+      {slide.subtitle && <p className={styles.subtitle}>{slide.subtitle}</p>}
     </div>
   );
 };

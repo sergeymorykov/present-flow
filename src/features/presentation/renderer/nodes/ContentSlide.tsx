@@ -22,6 +22,9 @@ export const ContentSlide: React.FC<Props> = ({ slide, visibleFragments }) => {
         slide.scroll ? styles.slide : `${styles.slide} ${styles.slideNoScroll}`
       }
     >
+      {slide.category && (
+        <div className={styles.category}>{slide.category}</div>
+      )}
       {slide.nodes.map((node, i) => {
         if (node.type === 'fragment') {
           const isVisible = fragmentCounter.current < visibleFragments;

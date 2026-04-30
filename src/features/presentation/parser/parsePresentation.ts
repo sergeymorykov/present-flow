@@ -17,6 +17,9 @@ import {
   NoteNode,
   NoteVariant,
   DividerNode,
+  BadgeRowNode,
+  DiagramNode,
+  BadgeRowItem,
 } from './types';
 import {
   SYNTAX_REGISTRY,
@@ -236,12 +239,36 @@ const parseBlockStyle = (lines: string[]): BlockStyle | undefined => {
 const parseTitleBlock = (lines: string[]): TitleSlide => {
   const collected: string[] = [];
   const styleLines: string[] = [];
+  const items: string[] = [];
+  let subtitle: string | undefined;
+  let author: string | undefined;
+  let affiliation: string | undefined;
   let date: string | undefined;
+  let badge: string | undefined;
+  let inItems = false;
 
   for (const line of lines) {
     const t = line.trim();
-    if (line.startsWith('\\date{')) {
+    if (t.startsWith(SYNTAX_REGISTRY.slideDirectives.subtitle)) {
+      subtitle = t.slice(SYNTAX_REGISTRY.slideDirectives.subtitle.length).trim();
+    } else if (t.startsWith('@author ')) {
+      author = t.slice(8).trim();
+    } else if (t.startsWith('@affiliation ')) {
+      affiliation = t.slice(13).trim();
+    } else if (t.startsWith('\\date{')) {
       date = line.match(/\\date\{([^}]*)\}/)?.[1];
+    } else if (t.startsWith(SYNTAX_REGISTRY.slideDirectives.badge)) {
+      badge = t.slice(SYNTAX_REGISTRY.slideDirectives.badge.length).trim();
+    } else if (t === SYNTAX_REGISTRY.slideDirectives.items.trim()) {
+      inItems = true;
+    } else if (t === SYNTAX_REGISTRY.blockDirectives.end.trim()) {
+      inItems = false;
+    } else if (inItems) {
+      if (t.startsWith('- ') || t.startsWith('* ')) {
+        items.push(t.slice(2).trim());
+      } else if (t) {
+        items.push(t);
+      }
     } else if (isStyleLine(t)) {
       styleLines.push(t);
     } else if (t) {
@@ -250,19 +277,17 @@ const parseTitleBlock = (lines: string[]): TitleSlide => {
   }
 
   const title = collected[0] ?? '';
-  const len = collected.length;
-  const subtitle = len >= 3 ? collected[1] : undefined;
-  const author = len >= 2 ? collected[len >= 3 ? 2 : 1] : undefined;
-  const affiliation = len >= 4 ? collected[3] : undefined;
   const style = parseBlockStyle(styleLines);
 
   return {
     type: 'title',
     title,
-    subtitle,
-    author,
-    affiliation,
+    subtitle: subtitle || (collected.length >= 3 ? collected[1] : undefined),
+    author: author || (collected.length >= 2 ? collected[collected.length >= 3 ? 2 : 1] : undefined),
+    affiliation: affiliation || (collected.length >= 4 ? collected[3] : undefined),
     date,
+    badge,
+    items: items.length > 0 ? items : undefined,
     style,
   };
 };
@@ -586,25 +611,54 @@ export const parsePresentation = (markdown: string): Slide[] => {
 
       if (firstLine.startsWith(SYNTAX_REGISTRY.slideDirectives.sectionPrefix)) {
         const title = firstLine.slice(SYNTAX_REGISTRY.slideDirectives.sectionPrefix.length).trim();
-        const styleLines = group.slice(1).map((l) => l.trim()).filter(Boolean);
+        let subtitle: string | undefined;
+        let icon: string | undefined;
+        const styleLines: string[] = [];
+        
+        for (const line of group.slice(1)) {
+          const t = line.trim();
+          if (t.startsWith(SYNTAX_REGISTRY.slideDirectives.subtitle)) {
+            subtitle = t.slice(SYNTAX_REGISTRY.slideDirectives.subtitle.length).trim();
+          } else if (t.startsWith('@icon ')) {
+            icon = t.slice(6).trim();
+          } else if (isStyleLine(t)) {
+            styleLines.push(t);
+          }
+        }
+        
         const style = parseBlockStyle(styleLines);
-        const node: SectionSlide = { type: 'section', title, style };
+        const node: SectionSlide = { type: 'section', title, subtitle, icon, style };
         slides.push(node);
         continue;
       }
 
       let contentGroup = group;
       let scroll = false;
-      const firstTrimmed = contentGroup.find((l) => l.trim())?.trim();
-      if (firstTrimmed === SYNTAX_REGISTRY.slideDirectives.yesScroll) {
-        scroll = true;
-        contentGroup = contentGroup.slice(
-          contentGroup.findIndex((l) => l.trim() === SYNTAX_REGISTRY.slideDirectives.yesScroll) + 1
-        );
+      let category: string | undefined;
+      
+      // Parse slide-level directives
+      const newContentGroup: string[] = [];
+      for (const line of contentGroup) {
+        const t = line.trim();
+        if (t === SYNTAX_REGISTRY.slideDirectives.yesScroll.trim()) {
+          scroll = true;
+        } else if (t === SYNTAX_REGISTRY.slideDirectives.noScroll.trim()) {
+          scroll = false;
+        } else if (t.startsWith(SYNTAX_REGISTRY.slideDirectives.category)) {
+          category = t.slice(SYNTAX_REGISTRY.slideDirectives.category.length).trim();
+        } else {
+          newContentGroup.push(line);
+        }
       }
-      const nodes = parseSlideContent(contentGroup);
+      
+      const nodes = parseSlideContent(newContentGroup);
       if (nodes.length > 0) {
-        const slide: ContentSlide = { type: 'content', nodes, ...(scroll && { scroll: true }) };
+        const slide: ContentSlide = { 
+          type: 'content', 
+          nodes, 
+          ...(scroll && { scroll: true }),
+          ...(category && { category })
+        };
         slides.push(slide);
       }
     }
