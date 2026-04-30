@@ -44,7 +44,7 @@ const cppLanguage: languages.IMonarchLanguage = {
     'string', 'wstring', 'u8string', 'u16string', 'u32string',
     'string_view', 'wstring_view',
     // Utilities
-    'pair', 'tuple', 'optional', 'variant', 'any', 'expected',
+    'pair', 'tuple', 'optional', 'variant', 'any', 'expected', 'unexpected',
     'function', 'reference_wrapper', 'initializer_list',
     // Iterators / ranges
     'iterator', 'const_iterator', 'reverse_iterator', 'const_reverse_iterator',
@@ -59,8 +59,8 @@ const cppLanguage: languages.IMonarchLanguage = {
     'atomic', 'atomic_flag', 'atomic_ref',
     'future', 'promise', 'packaged_task',
     // Exceptions
-    'exception', 'runtime_error', 'logic_error', 'out_of_range',
-    'invalid_argument', 'overflow_error', 'underflow_error', 'bad_alloc',
+    'exception', 'runtime_error', 'logic_error', 'length_error', 'out_of_range',
+    'invalid_argument', 'overflow_error', 'underflow_error', 'range_error', 'bad_alloc',
     'bad_cast', 'bad_typeid', 'bad_exception', 'bad_optional_access',
     // Memory
     'allocator', 'allocator_traits', 'pointer_traits',

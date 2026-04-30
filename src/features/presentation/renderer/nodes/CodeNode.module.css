@@ -105,8 +105,8 @@
   border: 1px solid #3a3a5c;
   border-radius: 6px;
   padding: 12px 16px;
-  min-height: 80px;
-  max-height: 180px;
+  min-height: 200px;
+  max-height: 380px;
   overflow-y: auto;
 }
 

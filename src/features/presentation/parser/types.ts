@@ -58,6 +58,8 @@ export type VideoNode = {
   loop?: boolean;
   controls?: boolean;
   playbackRate?: number;
+  width?: number;
+  height?: number;
 };
 
 export type CodeNode = {

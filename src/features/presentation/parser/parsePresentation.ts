@@ -62,6 +62,11 @@ const parseVideoDirective = (line: string): VideoNode => {
     const rate = parseFloat(speedPart.split('=')[1]);
     if (!isNaN(rate) && rate > 0) node.playbackRate = rate;
   }
+  for (let i = 1; i < parts.length; i++) {
+    const [key, value] = parts[i].split('=');
+    if (key === 'width' && value) node.width = parseInt(value, 10);
+    if (key === 'height' && value) node.height = parseInt(value, 10);
+  }
   return node;
 };
 
@@ -389,11 +394,31 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       nextListStyle = undefined;
       const fragmentLines: string[] = [];
       i++;
-      while (i < lines.length && !BLOCK_END.test(lines[i])) {
-        fragmentLines.push(lines[i]);
+      let nest = 1;
+      const isBlockStart = (l: string) => {
+        const t = l.trim();
+        return (
+          t.startsWith(SYNTAX_REGISTRY.blockDirectives.code) ||
+          t.startsWith(SYNTAX_REGISTRY.blockDirectives.table) ||
+          t.startsWith(SYNTAX_REGISTRY.blockDirectives.fragment) ||
+          t === SYNTAX_REGISTRY.blockDirectives.style ||
+          t === SYNTAX_REGISTRY.blockDirectives.columns ||
+          NOTE_DIRECTIVE.test(t)
+        );
+      };
+      while (i < lines.length) {
+        const currentLine = lines[i];
+        if (BLOCK_END.test(currentLine)) {
+          nest--;
+          i++;
+          if (nest === 0) break;
+          fragmentLines.push(currentLine);
+          continue;
+        }
+        fragmentLines.push(currentLine);
         i++;
+        if (isBlockStart(currentLine)) nest++;
       }
-      if (BLOCK_END.test(lines[i] ?? '')) i++;
       const styleLinesFrag = fragmentLines.map((l) => l.trim()).filter(isStyleLine);
       const contentLinesFrag = fragmentLines.filter((l) => !isStyleLine(l.trim()));
       const styleFrag = parseBlockStyle(styleLinesFrag);

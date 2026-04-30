@@ -62,6 +62,8 @@ export const VideoNode: React.FC<Props> = ({ node }) => {
         playsInline={true}
         controls={controls}
         preload="metadata"
+        width={node.width}
+        height={node.height}
       >
         <source src={src} type={mimeType} />
       </video>
