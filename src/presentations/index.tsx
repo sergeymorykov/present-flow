@@ -77,6 +77,46 @@ const lecture7Presentations: PresentationConfig[] = [
         default: m.PresentationLecture9,
       }))
     ),
+  },
+  {
+    id: 'lecture11-exceptions',
+    title: 'Лекция 11: Исключения',
+    description: 'Обработка ошибок',
+    component: lazy(() =>
+      import('./lecture11/PresentationLecture11').then((m) => ({
+        default: m.PresentationLecture11,
+      }))
+    ),
+  },
+  {
+    id: 'lecture13-multithreading',
+    title: 'Лекция 13: Многопоточность',
+    description: 'Процессы, потоки, std::thread',
+    component: lazy(() =>
+      import('./lecture13/PresentationLecture13').then((m) => ({
+        default: m.PresentationLecture13,
+      }))
+    ),
+  },
+  {
+    id: 'lecture15-multithreading-part-2',
+    title: 'Лекция 15: Многопоточность',
+    description: 'Race condition, std::mutex и т.п.',
+    component: lazy(() =>
+      import('./lecture15/PresentationLecture15').then((m) => ({
+        default: m.PresentationLecture15,
+      }))
+    ),
+  },
+  {
+    id: 'lecture17-concepts',
+    title: 'Лекция 17: Концепты',
+    description: 'Концепты, requires и requires',
+    component: lazy(() =>
+      import('./lecture17/PresentationLecture17').then((m) => ({
+        default: m.PresentationLecture17,
+      }))
+    ),
   }
 ];
 
