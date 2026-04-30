@@ -1,11 +1,10 @@
 services:
   present-flow:
+    # Образ runtime-only: ожидает уже собранный ./dist на хосте.
+    # Перед `docker compose build` обязательно: npm ci && npm run build
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        VITE_CPP_COMPILER_URL: ${VITE_CPP_COMPILER_URL:?VITE_CPP_COMPILER_URL is required in .env}
-        NODE_BUILD_MEMORY: ${NODE_BUILD_MEMORY:-2048}
     container_name: present-flow
     image: present-flow:${VERSION:-latest}
     init: true

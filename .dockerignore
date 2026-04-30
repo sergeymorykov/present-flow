@@ -2,8 +2,7 @@
 node_modules
 npm-debug.log
 
-# Build output
-dist
+# Build output — dist КОПИРУЕТСЯ в образ (сборка локально), не игнорируем
 coverage
 
 # VCS
