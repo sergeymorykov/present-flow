@@ -1,5 +1,5 @@
 import React from 'react';
-import { DiagramNode as DiagramNodeType } from '../../../parser/types';
+import { DiagramNode as DiagramNodeType } from '../../parser/types';
 import { blockStyleToCss } from './blockStyleToCss';
 import styles from './DiagramNode.module.css';
 

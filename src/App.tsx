@@ -9,18 +9,25 @@ import {
 import { Navbar } from './components/Navbar';
 import { presentations } from './presentations';
 import { Footer } from './components/Footer';
+import cardStyles from './App.module.css';
 
 const EditorPageLazy = lazy(() =>
   import('./pages/EditorPage').then((m) => ({ default: m.EditorPage }))
 );
 
 const styles: { [key: string]: React.CSSProperties } = {
-  app: { minHeight: '100vh', backgroundColor: '#0f0f1a' },
+  app: {
+    minHeight: '100vh',
+    backgroundColor: '#0f0f1a',
+    display: 'flex',
+    flexDirection: 'column',
+  },
   main: {
-    paddingTop: '80px',
-    paddingBottom: '60px',
     flex: 1,
     width: '100%',
+    minHeight: 0,
+    display: 'flex',
+    flexDirection: 'column',
   },
   home: { padding: '4rem 2rem', maxWidth: '1200px', margin: '0 auto' },
   title: { color: '#fff', textAlign: 'center', marginBottom: '3rem' },
@@ -28,22 +35,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
     gap: '2rem',
-  },
-  card: {
-    backgroundColor: '#1a1a2e',
-    padding: '2rem',
-    borderRadius: '10px',
-    color: '#fff',
-    textDecoration: 'none',
-    transition: 'transform 0.3s',
-    display: 'block',
-    cursor: 'pointer',
-  },
-  startBtn: {
-    color: '#4ecdc4',
-    fontWeight: 'bold',
-    marginTop: '1rem',
-    display: 'inline-block',
+    alignItems: 'stretch',
   },
   loader: {
     color: '#fff',
@@ -69,10 +61,10 @@ const Home: React.FC = () => (
     <h1 style={styles.title}>Выберите презентацию</h1>
     <div style={styles.grid}>
       {presentations.map((p) => (
-        <a key={p.id} href={`/presentation/${p.id}`} style={styles.card}>
+        <a key={p.id} href={`/presentation/${p.id}`} className={cardStyles.card}>
           <h3>{p.title}</h3>
           <p>{p.description}</p>
-          <span style={styles.startBtn}>Начать →</span>
+          <span className={cardStyles.startBtn}>Начать →</span>
         </a>
       ))}
     </div>

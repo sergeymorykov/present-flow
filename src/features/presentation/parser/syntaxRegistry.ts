@@ -22,6 +22,10 @@ type SyntaxRegistry = {
   slideDirectives: {
     title: string;
     sectionPrefix: string;
+    category: string;
+    subtitle: string;
+    badge: string;
+    items: string;
     yesScroll: string;
     noScroll: string;
   };
@@ -38,6 +42,8 @@ type SyntaxRegistry = {
     videoPrefix: string;
     divider: string;
     presenter: string;
+    badgeRow: string;
+    diagram: string;
   };
   noteVariants: string[];
   styleCommands: StyleCommandRegistryEntry[];

@@ -18,13 +18,8 @@ const styles: { [key: string]: React.CSSProperties } = {
   footer: {
     backgroundColor: '#1a1a2e',
     padding: '1.5rem 2rem',
-    position: 'fixed',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    marginTop: 'auto',
-    borderTop: '1px solid #2a2a4e',
-    zIndex: 1000
+    flexShrink: 0,
+    borderTop: '1px solid #2a2a4e'
   },
   container: {
     maxWidth: '1200px',

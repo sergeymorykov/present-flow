@@ -17,7 +17,6 @@
 ---
 
 @category Алгоритмы
-@subtitle Нижняя граница в отсортированном диапазоне
 # std::lower_bound
 
 **std::lower_bound** возвращает итератор на **первый элемент**, который **не меньше** заданного значения (≥ value). Работает по принципу бинарного поиска.
@@ -95,7 +94,6 @@ v.insert(pos, 4); // {1, 3, 4, 5, 7}
 ---
 
 @category Алгоритмы
-@subtitle Верхняя граница в отсортированном диапазоне
 # std::upper_bound
 
 **std::upper_bound** возвращает итератор на **первый элемент**, который **строго больше** заданного значения (> value).
@@ -158,7 +156,7 @@ auto [first, last] = std::equal_range(
 ---
 
 @category Алгоритмы
-@subtitle Частичная сортировка — поиск N-го элемента
+
 # std::nth_element
 
 **std::nth_element** переставляет элементы так, что N-й элемент оказывается на своём месте как в полностью отсортированном массиве.
@@ -233,7 +231,6 @@ nth_element — один из самых недооценённых алгори
 ---
 
 @category Алгоритмы
-@subtitle Разделение диапазона по предикату
 # std::partition
 
 **std::partition** переставляет элементы: все, для которых предикат = `true`, перед теми, для которых `false`.
@@ -287,7 +284,7 @@ BidirectionalIterator | purple
 @end
 
 ---
-
+@yesScroll
 @category Алгоритмы
 # std::partition — QuickSort
 
@@ -316,7 +313,6 @@ void quicksort(ForwardIt first, ForwardIt last) {
 ---
 
 @category Алгоритмы
-@subtitle Построение двоичной кучи (max-heap)
 # std::make_heap
 
 **std::make_heap** преобразует диапазон в **max-heap**. Максимальный элемент на позиции `first`. Куча хранится в массиве.
@@ -386,7 +382,6 @@ std::sort_heap(heap.begin(), heap.end());
 ---
 
 @category Алгоритмы
-@subtitle Очередь с приоритетом (адаптер контейнера)
 # std::priority_queue
 
 **std::priority_queue** — адаптер, реализующий **очередь с приоритетом** поверх кучи. По умолчанию — max-heap.
@@ -405,7 +400,7 @@ pop: O(log N) | orange
 - Внутренний контейнер — `std::vector`
 
 ---
-
+@yesScroll
 @category Алгоритмы
 # std::priority_queue — операции
 
@@ -441,7 +436,6 @@ std::priority_queue<int, std::vector<int>,
 ---
 
 @category Алгоритмы
-@subtitle Навигация по итераторам
 # std::next / advance / distance
 
 **std::next** возвращает итератор, продвинутый на N позиций, **не модифицируя** исходный. **std::advance** модифицирует на месте.
@@ -454,7 +448,6 @@ Other: O(N) | orange
 
 @table
 | Функция | Действие | Модификация |
-| :--- | :--- | :--- |
 | `std::next(it, n)` | Возвращает it + n | Нет |
 | `std::prev(it, n)` | Возвращает it - n | Нет |
 | `std::advance(it, n)` | Двигает it на n | Да |
@@ -517,7 +510,6 @@ auto pos = std::distance(v.cbegin(), it);
 ---
 
 @category Контейнеры
-@subtitle Динамический массив — основа STL
 # std::vector
 
 **std::vector** — динамический массив с **непрерывным** хранением в памяти. Ёмкость растёт автоматически (×1.5 или ×2).
@@ -539,7 +531,7 @@ Contiguous Memory | cyan
 @end
 
 ---
-
+@yesScroll
 @category Контейнеры
 # std::vector — структура памяти
 
@@ -595,7 +587,6 @@ values.shrink_to_fit();
 ---
 
 @category Контейнеры
-@subtitle Двусторонняя очередь — массив массивов
 # std::deque
 
 **std::deque** — контейнер с эффективной вставкой/удалением с **обоих концов**. Реализован как массив указателей на блоки (бакеты).
@@ -616,7 +607,7 @@ Random Access | green
 @end
 
 ---
-
+@yesScroll
 @category Контейнеры
 # std::deque — структура памяти
 
@@ -671,7 +662,6 @@ deque — контейнер по умолчанию для std::stack и std::q
 ---
 
 @category Контейнеры
-@subtitle Двусвязный список
 # std::list
 
 **std::list** — двусвязный список. Каждый элемент в отдельном узле с указателями prev/next. O(1) вставка/удаление при наличии итератора.
@@ -688,7 +678,6 @@ O(1) insert/erase | green
 - Собственный метод `sort()` — merge sort
 
 ---
-
 @category Контейнеры
 # std::list — структура памяти
 
@@ -832,7 +821,6 @@ fl.insert_after(fl.before_begin(), -1);
 ---
 
 @category Контейнеры
-@subtitle Упорядоченное множество уникальных элементов
 # std::set
 
 **std::set** хранит **уникальные** элементы в **отсортированном порядке**. Реализован как **красно-чёрное дерево**.
@@ -872,7 +860,7 @@ Bidirectional Iterator | purple
 @end
 
 ---
-
+@yesScroll
 @category Контейнеры
 # std::set — пример кода
 
@@ -898,9 +886,8 @@ std::advance(iter, 2);  // OK
 @end
 
 ---
-
+@yesScroll
 @category Контейнеры
-@subtitle Упорядоченное множество с дубликатами
 # std::multiset
 
 **std::multiset** — аналог set, но **допускает дубликаты**. Метод `insert` всегда успешен.
@@ -954,7 +941,7 @@ for (auto it = lo; it != hi; ++it)
 ---
 
 @category Контейнеры
-@subtitle Словарь с упорядоченными ключами
+
 # std::map
 
 **std::map** хранит пары `{ключ, значение}` в отсортированном порядке ключей. Ключи уникальны.
@@ -967,7 +954,6 @@ pair<const Key, Value> | purple
 
 @table
 | Операция | Сложность | Примечание |
-| :--- | :--- | :--- |
 | `insert({k,v})` | O(log N) | Не перезаписывает |
 | `operator[k]` | O(log N) | Создаёт если нет! |
 | `at(k)` | O(log N) | throw если нет |
@@ -1001,7 +987,7 @@ operator[] создаёт элемент с дефолтным значение�
 @end
 
 ---
-
+@yesScroll
 @category Контейнеры
 # std::map — пример кода
 
@@ -1029,7 +1015,6 @@ for (auto& [key, value] : m)
 ---
 
 @category Контейнеры
-@subtitle Хеш-таблица — O(1) поиск и вставка
 # std::unordered_set
 
 **std::unordered_set** — контейнер на основе **хеш-таблицы**. Амортизированный O(1). Элементы **не упорядочены**.
@@ -1122,7 +1107,6 @@ unordered — для скорости, set/map — когда нужен пор�
 ---
 
 @category Адаптеры
-@subtitle Очередь FIFO — First In, First Out
 # std::queue
 
 **std::queue** — адаптер, реализующий очередь **FIFO**. По умолчанию использует `std::deque`.
@@ -1194,12 +1178,10 @@ while (!q.empty()) {
 ---
 
 @category Контейнеры
-@subtitle Сводная таблица
 # Инвалидация итераторов
 
 @table
-| Контейнер | insert/push | erase/pop |
-| :--- | :--- | :--- |
+| Контейнер | insert/push | erase/pop | 
 | `vector` | Все (реаллок) | От точки удаления |
 | `deque` | Все итераторы | От точки удаления |
 | `list` | Никакие | Только удалённый |
@@ -1214,22 +1196,8 @@ while (!q.empty()) {
 
 ---
 
-@title Итоги
-@subtitle Выбор правильного контейнера и алгоритма — ключ к эффективному C++
-@badge Резюме
-@items
-- vector — по умолчанию
-- set/map — когда нужен порядок
-- unordered — когда нужна скорость
-- lower/upper_bound — бинарный поиск
-- partition — основа quicksort
-- nth_element — медиана за O(N)
-- priority_queue — очередь с приоритетом
-@end
-
----
-
-@title Корутины в C++20
+@title 
+Корутины в C++20
 @subtitle Приостановка, возобновление, генераторы и асинхронность
 @badge C++20
 @items
@@ -1247,7 +1215,7 @@ while (!q.empty()) {
 ---
 
 @category Корутины
-@subtitle Эволюция функций в C++
+
 # Корутины — определение
 
 **Корутина** — это функция, которая может **приостановить** своё выполнение и **возобновить** его позже, сохраняя при этом своё состояние. Концепция предложена Мелвином Конвеем в 1963 году.
@@ -1262,7 +1230,7 @@ while (!q.empty()) {
 @end
 
 ---
-
+@yesScroll
 @category Корутины
 # Функция vs Корутина
 
@@ -1300,14 +1268,12 @@ while (!q.empty()) {
 ---
 
 @category Корутины
-@subtitle co_await, co_yield, co_return
 # Три ключевых слова
 
 Функция становится корутиной, если использует одно из трёх ключевых слов:
 
 @table
 | Ключевое слово | Назначение | Аналогия |
-| :--- | :--- | :--- |
 | `co_await expr` | Приостановить до готовности `expr` | Ожидание результата |
 | `co_yield value` | Вернуть значение и приостановиться | Генератор / поток |
 | `co_return value` | Завершить и вернуть значение | Аналог `return` |
@@ -1392,7 +1358,7 @@ for (auto n : numbers)
 @end
 
 ---
-
+@yesScroll
 @category Корутины
 # Ленивый генератор — корутина
 
@@ -1433,7 +1399,6 @@ for (int i = 0; i <= 20; ++i) {
 
 @table
 | Компонент | Описание | Расположение |
-| :--- | :--- | :--- |
 | **Promise object** | Управляет результатом корутины изнутри | Внутри frame |
 | **Coroutine handle** | Не-владеющий handle для resume/destroy | У вызывающего |
 | **Coroutine frame** | Состояние: promise, параметры, локалы | Куча (heap) |
@@ -1480,7 +1445,6 @@ for (int i = 0; i <= 20; ++i) {
 
 @table
 | Метод | Назначение |
-| :--- | :--- |
 | `get_return_object()` | Создаёт объект, возвращаемый вызывающему |
 | `initial_suspend()` | Приостановить в начале? (lazy vs eager) |
 | `final_suspend()` | Приостановить в конце? (noexcept!) |
@@ -1526,7 +1490,6 @@ for (int i = 0; i <= 20; ++i) {
 ---
 
 @category Корутины
-@subtitle suspend_always и suspend_never
 # Стандартные Awaitables
 
 @code cpp
@@ -1560,7 +1523,7 @@ initial_suspend() → suspend_always = ленивая корутина, suspend_
 @icon ⚙️
 
 ---
-
+@yesScroll
 @category Корутины
 # Generator — promise_type
 
@@ -1590,7 +1553,7 @@ struct Generator {
 @end
 
 ---
-
+@yesScroll
 @category Корутины
 # Generator — handle и API
 
@@ -1620,7 +1583,7 @@ struct Generator {
 @end
 
 ---
-
+@yesScroll
 @category Корутины
 # Generator — использование
 
@@ -1652,7 +1615,7 @@ int main() {
 @end
 
 ---
-
+@yesScroll
 @category Корутины
 # Generator — поток выполнения
 
@@ -1691,9 +1654,8 @@ int main() {
 @icon ⏳
 
 ---
-
+@yesScroll
 @category Корутины
-@subtitle Три метода ожидания
 # Awaitable — интерфейс
 
 Выражение в `co_await expr` должно быть **Awaitable** — реализовывать три метода:
@@ -1727,7 +1689,7 @@ co_await expr:
 @end
 
 ---
-
+@yesScroll
 @category Корутины
 # Блокирующий vs Ожидающий сервер
 
@@ -1762,7 +1724,6 @@ while (true) {
 ---
 
 @category Корутины
-@subtitle Паттерн Sender-Receiver через co_await
 # Event — синхронизация потоков
 
 Класс **Event** реализует синхронизацию потоков через корутины — один поток отправляет (`notify`), другой ожидает (`co_await`).
@@ -1777,7 +1738,7 @@ while (true) {
 @end
 
 ---
-
+@yesScroll
 @category Корутины
 # Event::Awaiter — реализация
 
@@ -1806,7 +1767,7 @@ public:
 @end
 
 ---
-
+@yesScroll
 @category Корутины
 # Event::notify — возобновление
 
@@ -1833,7 +1794,7 @@ Task receiver(Event& event) {
 @end
 
 ---
-
+@yesScroll
 @category Корутины
 # Sender-Receiver — поток выполнения
 
@@ -1877,7 +1838,6 @@ Task receiver(Event& event) {
 
 @table
 | Свойство | Корутины | Потоки (threads) |
-| :--- | :--- | :--- |
 | Создание | <span style="color:var(--accent-green)">Легковесные</span> | Тяжёлые (1-2 MB стек) |
 | Переключение | <span style="color:var(--accent-green)">Без ядра</span> | Через ядро ОС |
 | Масштабируемость | <span style="color:var(--accent-green)">Миллиарды</span> | Тысячи |
@@ -1885,7 +1845,7 @@ Task receiver(Event& event) {
 @end
 
 ---
-
+@yesScroll
 @category Корутины
 # Generator с range-based for
 
@@ -1914,19 +1874,4 @@ Generator<long long> fibonacci() {
         b += tmp;
     }
 }
-@end
-
----
-
-@title Итоги: Корутины C++20
-@subtitle Новый уровень абстракции для асинхронности и ленивых вычислений
-@badge Резюме
-@items
-- co_yield — генераторы
-- co_await — асинхронность
-- co_return — завершение
-- promise_type — настройка
-- coroutine_handle — управление
-- suspend_always / never
-- Awaitable интерфейс
 @end

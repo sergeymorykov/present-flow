@@ -140,8 +140,8 @@ const lecture7Presentations: PresentationConfig[] = [
   },
   {
     id: 'lecture16-parallel-algorithms',
-    title: 'Лекция 16: Параллелизм в C++',
-    description: 'От std::thread до параллельных алгоритмов STL',
+    title: 'Лекция 16: Unit-тестирование на C++',
+    description: 'От «у меня работает» к «у меня гарантированно работает»',
     component: lazy(() =>
       import('./lecture16/PresentationLecture16').then((m) => ({
         default: m.PresentationLecture16,

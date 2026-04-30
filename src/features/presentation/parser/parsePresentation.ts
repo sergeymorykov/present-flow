@@ -428,6 +428,8 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
           t.startsWith(SYNTAX_REGISTRY.blockDirectives.fragment) ||
           t === SYNTAX_REGISTRY.blockDirectives.style ||
           t === SYNTAX_REGISTRY.blockDirectives.columns ||
+          t === SYNTAX_REGISTRY.blockDirectives.badgeRow ||
+          t === SYNTAX_REGISTRY.blockDirectives.diagram ||
           NOTE_DIRECTIVE.test(t)
         );
       };
@@ -514,6 +516,54 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
       continue;
     }
 
+    if (line.trim() === SYNTAX_REGISTRY.blockDirectives.badgeRow) {
+      flushTextBuffer(textBuffer, nodes, nextListStyle);
+      nextListStyle = undefined;
+      const styleLines: string[] = [];
+      const items: BadgeRowItem[] = [];
+      i++;
+      while (i < lines.length && !BLOCK_END.test(lines[i])) {
+        const t = lines[i].trim();
+        if (!t) { i++; continue; }
+        if (isStyleLine(t)) {
+          styleLines.push(t);
+        } else {
+          const [text, color] = t.split('|').map((s) => s.trim());
+          items.push({ text, ...(color && { color }) });
+        }
+        i++;
+      }
+      if (BLOCK_END.test(lines[i] ?? '')) i++;
+      const style = parseBlockStyle(styleLines);
+      const node: BadgeRowNode = { type: 'badge-row', items, style };
+      nodes.push(node);
+      continue;
+    }
+
+    if (line.trim() === SYNTAX_REGISTRY.blockDirectives.diagram) {
+      flushTextBuffer(textBuffer, nodes, nextListStyle);
+      nextListStyle = undefined;
+      const styleLines: string[] = [];
+      const htmlLines: string[] = [];
+      i++;
+      let stylePhase = true;
+      while (i < lines.length && !BLOCK_END.test(lines[i])) {
+        const raw = lines[i];
+        if (stylePhase && isStyleLine(raw.trim())) {
+          styleLines.push(raw.trim());
+        } else {
+          stylePhase = false;
+          htmlLines.push(raw);
+        }
+        i++;
+      }
+      if (BLOCK_END.test(lines[i] ?? '')) i++;
+      const style = parseBlockStyle(styleLines);
+      const node: DiagramNode = { type: 'diagram', value: htmlLines.join('\n'), style };
+      nodes.push(node);
+      continue;
+    }
+
     if (line.startsWith(SYNTAX_REGISTRY.blockDirectives.columns)) {
       flushTextBuffer(textBuffer, nodes, nextListStyle);
       nextListStyle = undefined;
@@ -528,6 +578,8 @@ const parseSlideContent = (lines: string[]): SlideNode[] => {
           t.startsWith(SYNTAX_REGISTRY.blockDirectives.fragment) ||
           t === SYNTAX_REGISTRY.blockDirectives.style ||
           t === SYNTAX_REGISTRY.blockDirectives.columns ||
+          t === SYNTAX_REGISTRY.blockDirectives.badgeRow ||
+          t === SYNTAX_REGISTRY.blockDirectives.diagram ||
           NOTE_DIRECTIVE.test(t)
         );
       };

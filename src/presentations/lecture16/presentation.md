@@ -118,7 +118,7 @@ TEST_METHOD(MethodName_Scenario_Expected) {
 @end
 
 ---
-
+@yesScroll
 @category Примеры кода
 # Пример 1: Базовый тест
 
@@ -151,7 +151,7 @@ public:
 @end
 
 ---
-
+@yesScroll
 @category Примеры кода
 # Пример 2: Граничные случаи и исключения
 
@@ -195,7 +195,6 @@ public:
 
 @table
 | Категория | Метод Assert:: | Применение |
-| :--- | :--- | :--- |
 | Равенство | `AreEqual(exp, act)` | int, char, enum, строки |
 | Неравенство | `AreNotEqual(exp, act)` | Проверка различий |
 | Идентичность ссылок | `AreSame(ptr1, ptr2)` | Один объект в памяти |
@@ -212,7 +211,7 @@ public:
 @end
 
 ---
-
+@yesScroll
 @category Архитектура
 # Организация тестового кода
 

@@ -1,0 +1,38 @@
+.card {
+  background-color: #1a1a2e;
+  padding: 2rem;
+  border-radius: 10px;
+  color: #fff;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  background-color: #20203a;
+  border-color: #00d9ff;
+  box-shadow: 0 12px 28px rgba(0, 217, 255, 0.18);
+}
+
+.card > h3 {
+  margin-top: 0;
+}
+
+.startBtn {
+  color: #4ecdc4;
+  font-weight: bold;
+  margin-top: auto;
+  padding-top: 1rem;
+  display: inline-block;
+  align-self: flex-start;
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.card:hover .startBtn {
+  color: #00d9ff;
+  transform: translateX(4px);
+}
