@@ -92,8 +92,8 @@ function handleJoin(ws, data) {
     broadcastToRoom(roomId, { 
       type: 'SIGNAL', 
       roomId: roomId, 
-      senderId: 'server', 
-      data: { type: 'JOIN', senderId } 
+      senderId: senderId, 
+      data: { type: 'JOIN' } 
     }, ws);
   }
 }
@@ -116,6 +116,14 @@ function handleLeave(ws) {
     if (!hasOtherSockets) {
       room.participants.delete(userId);
       console.log(`User ${userId} left room ${roomId}. Participants left: ${room.participants.size}`);
+
+      // Уведомляем остальных, что участник ушел
+      broadcastToRoom(roomId, {
+        type: 'SIGNAL',
+        roomId: roomId,
+        senderId: userId,
+        data: { type: 'LEAVE' }
+      }, ws);
 
       if (room.participants.size === 0) {
         // Запускаем таймер на удаление комнаты (10 секунд)
