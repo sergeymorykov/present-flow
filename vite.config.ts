@@ -27,13 +27,18 @@ export default defineConfig(({ mode }) => {
 
     build: {
       outDir: 'dist',
-      // Чтобы структура папок была похожа на webpack (static/js, static/media)
-      assetsDir: 'static', 
-      sourcemap: isProduction, // Аналог devtool
+      assetsDir: 'static',
+      // Sourcemap в проде сильно раздувает память сборки. Включить через VITE_SOURCEMAP=true при необходимости.
+      sourcemap: isProduction ? process.env.VITE_SOURCEMAP === 'true' : true,
       minify: isProduction ? 'esbuild' : false,
-      
-      // Настройка имен файлов (опционально, для максимального сходства с webpack)
+      target: 'es2020',
+      cssCodeSplit: true,
+      reportCompressedSize: false,
+      chunkSizeWarningLimit: 1500,
+
       rollupOptions: {
+        // Кэш rollup тоже жрёт RAM, отключаем — на CI выгоднее
+        cache: false,
         output: {
           entryFileNames: `static/js/[name].[hash].js`,
           chunkFileNames: `static/js/[name].[hash].js`,
@@ -48,6 +53,14 @@ export default defineConfig(({ mode }) => {
               return 'static/fonts/[name]-[hash][extname]';
             }
             return 'static/assets/[name]-[hash][extname]';
+          },
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return undefined;
+            if (id.includes('monaco-editor')) return 'monaco';
+            if (id.includes('react-dom')) return 'react-dom';
+            if (id.includes('react-router')) return 'router';
+            if (id.includes('/react/')) return 'react';
+            return 'vendor';
           },
         },
       },
