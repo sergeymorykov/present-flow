@@ -3,10 +3,10 @@ const { WebSocketServer } = require('ws');
 const port = process.env.PORT || 8089;
 const wss = new WebSocketServer({ port });
 
-// Храним объекты комнат: { id, name, participants: Set([userId1, userId2]) }
 let rooms = [];
-// Карта для быстрого поиска: ws -> { roomId, userId }
 const clients = new Map();
+// Таймеры на удаление комнат: roomId -> setTimeout object
+const roomDeleteTimeouts = new Map();
 
 console.log(`Signaling server started on port ${port}`);
 
@@ -28,46 +28,19 @@ wss.on('connection', (ws) => {
 
       switch (data.type) {
         case 'QUERY_ROOMS':
-          // Отправляем список комнат с количеством уникальных участников
-          const roomList = rooms.map(r => ({ id: r.id, name: r.name, participants: r.participants.size }));
-          ws.send(JSON.stringify({ type: 'ROOMS_LIST', rooms: roomList }));
+          ws.send(JSON.stringify({ type: 'ROOMS_LIST', rooms: getCleanRooms() }));
           break;
 
         case 'CREATE_ROOM':
-          // Если комната уже есть, просто заходим в нее
-          let room = rooms.find(r => r.id === data.roomId);
-          if (!room) {
-            room = {
-              id: data.roomId,
-              name: data.name,
-              participants: new Set([data.senderId])
-            };
-            rooms.push(room);
-          } else {
-            room.participants.add(data.senderId);
-          }
-          clients.set(ws, { roomId: data.roomId, userId: data.senderId });
-          broadcastRoomUpdate(room);
+        case 'JOIN':
+          handleJoin(ws, data);
           break;
 
-        case 'JOIN':
-          const targetRoom = rooms.find(r => r.id === data.roomId);
-          if (targetRoom) {
-            targetRoom.participants.add(data.senderId);
-            clients.set(ws, { roomId: data.roomId, userId: data.senderId });
-            broadcastRoomUpdate(targetRoom);
-            // Уведомляем других о входе (для WebRTC)
-            broadcastToRoom(data.roomId, { 
-              type: 'SIGNAL', 
-              roomId: data.roomId, 
-              senderId: 'server', 
-              data: { type: 'JOIN', senderId: data.senderId } 
-            }, ws);
-          }
+        case 'LEAVE':
+          handleLeave(ws);
           break;
 
         case 'SIGNAL':
-          // Пересылаем сигнал всем, кроме отправителя
           broadcastToRoom(data.roomId, data, ws);
           break;
       }
@@ -76,35 +49,87 @@ wss.on('connection', (ws) => {
     }
   });
 
-  ws.on('close', () => {
-    const clientInfo = clients.get(ws);
-    if (clientInfo) {
-      const { roomId, userId } = clientInfo;
-      const room = rooms.find(r => r.id === roomId);
-      if (room) {
-        // Важно: мы не удаляем пользователя из Set сразу, 
-        // чтобы дать ему пару секунд на переподключение, 
-        // ИЛИ проверяем, нет ли у него другого открытого сокета.
-        
-        // Проверяем, есть ли у этого же пользователя другие активные сокеты
-        const hasOtherSockets = Array.from(clients.entries()).some(([socket, info]) => 
-          socket !== ws && socket.readyState === 1 && info.userId === userId && info.roomId === roomId
-        );
-
-        if (!hasOtherSockets) {
-          room.participants.delete(userId);
-          if (room.participants.size === 0) {
-            rooms = rooms.filter(r => r.id !== roomId);
-            broadcast({ type: 'ROOMS_LIST', rooms: rooms.map(r => ({ id: r.id, name: r.name, participants: r.participants.size })) });
-          } else {
-            broadcastRoomUpdate(room);
-          }
-        }
-      }
-      clients.delete(ws);
-    }
-  });
+  ws.on('close', () => handleLeave(ws));
 });
+
+function handleJoin(ws, data) {
+  const { roomId, senderId, name } = data;
+  let room = rooms.find(r => r.id === roomId);
+
+  if (!room) {
+    room = {
+      id: roomId,
+      name: name || `Room ${roomId}`,
+      participants: new Set()
+    };
+    rooms.push(room);
+  }
+
+  // Если был запущен таймер удаления комнаты - отменяем его
+  if (roomDeleteTimeouts.has(roomId)) {
+    console.log(`Cancelling delete timeout for room ${roomId}`);
+    clearTimeout(roomDeleteTimeouts.get(roomId));
+    roomDeleteTimeouts.delete(roomId);
+  }
+
+  room.participants.add(senderId);
+  clients.set(ws, { roomId, userId: senderId });
+  
+  // Отправляем ВСЕМ обновление комнаты
+  broadcastRoomUpdate(room);
+  // Отправляем вошедшему актуальный список (чтобы RoomPage точно нашел свою комнату)
+  ws.send(JSON.stringify({ type: 'ROOMS_LIST', rooms: getCleanRooms() }));
+  
+  if (data.type === 'JOIN') {
+    broadcastToRoom(roomId, { 
+      type: 'SIGNAL', 
+      roomId: roomId, 
+      senderId: 'server', 
+      data: { type: 'JOIN', senderId } 
+    }, ws);
+  }
+}
+
+function handleLeave(ws) {
+  const clientInfo = clients.get(ws);
+  if (!clientInfo) return;
+
+  const { roomId, userId } = clientInfo;
+  const room = rooms.find(r => r.id === roomId);
+  
+  clients.delete(ws);
+
+  if (room) {
+    // Проверяем, нет ли у этого пользователя других активных сокетов
+    const hasOtherSockets = Array.from(clients.entries()).some(([socket, info]) => 
+      info.userId === userId && info.roomId === roomId
+    );
+
+    if (!hasOtherSockets) {
+      room.participants.delete(userId);
+      console.log(`User ${userId} left room ${roomId}. Participants left: ${room.participants.size}`);
+
+      if (room.participants.size === 0) {
+        // Запускаем таймер на удаление комнаты (10 секунд)
+        console.log(`Room ${roomId} is empty. Starting 10s delete timeout.`);
+        const timeout = setTimeout(() => {
+          rooms = rooms.filter(r => r.id !== roomId);
+          roomDeleteTimeouts.delete(roomId);
+          broadcast({ type: 'ROOMS_LIST', rooms: getCleanRooms() });
+          console.log(`Room ${roomId} deleted after grace period.`);
+        }, 10000);
+        
+        roomDeleteTimeouts.set(roomId, timeout);
+      } else {
+        broadcastRoomUpdate(room);
+      }
+    }
+  }
+}
+
+function getCleanRooms() {
+  return rooms.map(r => ({ id: r.id, name: r.name, participants: r.participants.size }));
+}
 
 function broadcastRoomUpdate(room) {
   broadcast({ 
@@ -117,9 +142,10 @@ function broadcastToRoom(roomId, data, excludeWs) {
   const msg = JSON.stringify(data);
   wss.clients.forEach(client => {
     const info = clients.get(client);
-    if (client !== excludeWs && client.readyState === 1 && info && info.roomId === roomId) {
-      client.send(msg);
-    }
+    if (client === excludeWs || client.readyState !== 1 || !info || info.roomId !== roomId) return;
+    // Если указан targetId — слать только ему
+    if (data.targetId && info.userId !== data.targetId) return;
+    client.send(msg);
   });
 }
 

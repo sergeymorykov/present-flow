@@ -48,21 +48,13 @@ export const CallsPage: React.FC = () => {
       return;
     }
 
-    const newRoom: RoomInfo = {
-      id: callsSignal.generateId(),
-      name: newRoomName,
-      hasPassword: usePassword,
-      password: usePassword ? password : undefined,
-      participantsCount: 0,
-      creatorId: myId
-    };
-
-    callsSignal.send({ type: 'ROOM_CREATED', room: newRoom });
-    navigate(`/calls/${newRoom.id}`);
+    const roomId = callsSignal.generateId();
+    callsSignal.send({ type: 'CREATE_ROOM', roomId, name: newRoomName, senderId: myId });
+    navigate(`/calls/${roomId}`);
   };
 
   const handleJoinRoom = (room: RoomInfo) => {
-    if (room.participantsCount >= 20) {
+    if (room.participants >= 20) {
       alert('В комнате уже максимум участников.');
       return;
     }
@@ -132,7 +124,7 @@ export const CallsPage: React.FC = () => {
                   <div key={room.id} style={styles.roomItem}>
                     <div>
                       <div style={styles.roomName}>{room.name} {room.hasPassword ? '🔒' : ''}</div>
-                      <div style={styles.roomMeta}>Участников: {room.participantsCount}/20</div>
+                      <div style={styles.roomMeta}>Участников: {room.participants}/20</div>
                     </div>
                     <div style={styles.actionBlock}>
                       {room.hasPassword && (

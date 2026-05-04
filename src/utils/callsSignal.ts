@@ -1,30 +1,30 @@
 /**
  * Синхронизация звонков через WebSocket.
- * Позволяет разным браузерам обмениваться информацией о комнатах и сигналами WebRTC.
  */
 
 export interface RoomInfo {
   id: string;
   name: string;
-  participantsCount: number;
-  hasPassword?: boolean;
-  password?: string;
-  creatorId: string;
+  participants: number;   // Поле от сервера
 }
 
-export type SignalMessage = 
+export type SignalMessage =
   | { type: 'QUERY_ROOMS' }
-  | { type: 'ROOMS_LIST', rooms: RoomInfo[] }
-  | { type: 'ROOM_CREATED', room: RoomInfo }
-  | { type: 'ROOM_UPDATED', room: RoomInfo }
-  | { type: 'ROOM_DELETED', roomId: string }
-  | { type: 'SIGNAL', roomId: string, senderId: string, targetId?: string, data: any };
+  | { type: 'CREATE_ROOM'; roomId: string; name: string; senderId: string }
+  | { type: 'JOIN'; roomId: string; senderId: string }
+  | { type: 'LEAVE'; roomId: string; senderId: string }
+  | { type: 'ROOMS_LIST'; rooms: RoomInfo[] }
+  | { type: 'ROOM_UPDATED'; room: RoomInfo }
+  | { type: 'ROOM_DELETED'; roomId: string }
+  | { type: 'SIGNAL'; roomId: string; senderId: string; targetId?: string; data: any };
 
 class CallsSignal {
   private socket: WebSocket | null = null;
   private listeners: ((msg: SignalMessage) => void)[] = [];
   private myId = Math.random().toString(36).substr(2, 9);
   private reconnectTimer: any = null;
+  // Запоминаем, в какой комнате сейчас пользователь, для переподключения
+  private currentRoomId: string | null = null;
 
   constructor() {
     this.connect();
@@ -32,21 +32,24 @@ class CallsSignal {
 
   private connect() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    
-    // В продакшене (через Nginx) используем путь /ws/ на том же хосте/порту
-    // В разработке используем прямой порт 8089
     const isProd = import.meta.env.PROD;
-    const wsUrl = isProd 
+    const wsUrl = isProd
       ? `${protocol}//${window.location.host}/ws/`
       : `${protocol}//${window.location.hostname}:8089`;
-    
+
     try {
       console.log('Connecting to:', wsUrl);
       this.socket = new WebSocket(wsUrl);
 
       this.socket.onopen = () => {
         console.log('Connected to signaling server');
-        this.send({ type: 'QUERY_ROOMS' });
+        // Сразу запрашиваем список комнат
+        this.sendRaw({ type: 'QUERY_ROOMS' });
+        // Если мы были в комнате до переподключения — переотправляем JOIN
+        if (this.currentRoomId) {
+          console.log('Rejoining room after reconnect:', this.currentRoomId);
+          this.sendRaw({ type: 'JOIN', roomId: this.currentRoomId, senderId: this.myId });
+        }
       };
 
       this.socket.onmessage = (event) => {
@@ -81,6 +84,12 @@ class CallsSignal {
     }, 3000);
   }
 
+  private sendRaw(msg: object) {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      this.socket.send(JSON.stringify(msg));
+    }
+  }
+
   subscribe(listener: (msg: SignalMessage) => void) {
     this.listeners.push(listener);
     return () => {
@@ -92,9 +101,20 @@ class CallsSignal {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
       this.socket.send(JSON.stringify(msg));
     } else {
-      // Если сокет не готов, пробуем отправить позже или игнорируем ephemeral сообщения
       console.warn('Socket not ready, message not sent:', msg.type);
     }
+  }
+
+  // Вызывается из RoomPage при входе в комнату
+  joinRoom(roomId: string) {
+    this.currentRoomId = roomId;
+    this.send({ type: 'JOIN', roomId, senderId: this.myId });
+  }
+
+  // Вызывается из RoomPage при выходе из комнаты
+  leaveRoom(roomId: string) {
+    this.currentRoomId = null;
+    this.send({ type: 'LEAVE', roomId, senderId: this.myId });
   }
 
   getMyId() {

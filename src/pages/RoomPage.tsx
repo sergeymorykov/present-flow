@@ -12,7 +12,7 @@ export const RoomPage: React.FC = () => {
   const [isAudioMuted, setIsAudioMuted] = useState(false);
   const [isVideoMuted, setIsVideoMuted] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [peers, setPeers] = useState<{ [id: string]: MediaStream }>({});
   const peerConnections = useRef<{ [id: string]: RTCPeerConnection }>({});
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -33,9 +33,9 @@ export const RoomPage: React.FC = () => {
   useEffect(() => {
     async function startMedia() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: { width: 1280, height: 720 }, 
-          audio: true 
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: 1280, height: 720 },
+          audio: true
         });
         setLocalStream(stream);
       } catch (err: any) {
@@ -75,7 +75,7 @@ export const RoomPage: React.FC = () => {
     if (!roomId || !localStream) return;
 
     const leaveRoom = () => {
-      callsSignal.send({ type: 'SIGNAL', roomId, senderId: myId, data: { type: 'LEAVE' } });
+      callsSignal.leaveRoom(roomId);
     };
 
     window.addEventListener('beforeunload', leaveRoom);
@@ -115,7 +115,7 @@ export const RoomPage: React.FC = () => {
     });
 
     // Сообщаем серверу, что мы вошли
-    callsSignal.send({ type: 'SIGNAL', roomId, senderId: myId, data: { type: 'JOIN' } });
+    callsSignal.joinRoom(roomId);
     callsSignal.send({ type: 'QUERY_ROOMS' });
 
     return () => {
@@ -129,24 +129,24 @@ export const RoomPage: React.FC = () => {
 
   const createPeerConnection = (peerId: string, isInitiator: boolean) => {
     if (peerConnections.current[peerId]) return peerConnections.current[peerId];
-    
+
     const pc = new RTCPeerConnection(rtcConfig);
     peerConnections.current[peerId] = pc;
 
     localStream?.getTracks().forEach(track => pc.addTrack(track, localStream));
-    
+
     pc.ontrack = (e) => {
       setPeers(prev => ({ ...prev, [peerId]: e.streams[0] }));
     };
 
     pc.onicecandidate = (e) => {
       if (e.candidate) {
-        callsSignal.send({ 
-          type: 'SIGNAL', 
-          roomId: roomId!, 
-          senderId: myId, 
-          targetId: peerId, 
-          data: { candidate: e.candidate } 
+        callsSignal.send({
+          type: 'SIGNAL',
+          roomId: roomId!,
+          senderId: myId,
+          targetId: peerId,
+          data: { candidate: e.candidate }
         });
       }
     };
@@ -199,7 +199,7 @@ export const RoomPage: React.FC = () => {
         <div style={styles.header}>
           <div style={styles.roomInfo}>
             <h1 style={styles.roomName}>{room.name}</h1>
-            <span style={styles.badge}>{room.participantsCount} уч.</span>
+            <span style={styles.badge}>{room.participants} уч.</span>
           </div>
           <button onClick={() => navigate('/calls')} style={styles.leaveBtn}>🚪 Покинуть</button>
         </div>
@@ -207,32 +207,32 @@ export const RoomPage: React.FC = () => {
         <div style={styles.videoGrid}>
           {/* Локальное видео */}
           <div style={styles.videoCard}>
-            <video 
-              ref={localVideoRef} 
-              autoPlay 
-              muted 
-              playsInline 
+            <video
+              ref={localVideoRef}
+              autoPlay
+              muted
+              playsInline
               style={{
-                ...styles.video, 
+                ...styles.video,
                 opacity: isVideoMuted ? 0 : 1,
                 transform: 'scaleX(-1)' // Зеркальное отображение
-              }} 
+              }}
             />
             {isVideoMuted && <div style={styles.videoOffPlaceholder}>📷 Камера выключена</div>}
             <div style={styles.label}>Вы {isAudioMuted && '🔇'}</div>
-            
+
             {/* Кнопки управления локальным видео */}
             <div style={styles.controls}>
-              <button 
-                onClick={() => setIsAudioMuted(!isAudioMuted)} 
-                style={{...styles.controlBtn, backgroundColor: isAudioMuted ? '#ff4d4d' : 'rgba(255,255,255,0.2)'}}
+              <button
+                onClick={() => setIsAudioMuted(!isAudioMuted)}
+                style={{ ...styles.controlBtn, backgroundColor: isAudioMuted ? '#ff4d4d' : 'rgba(255,255,255,0.2)' }}
                 title={isAudioMuted ? "Включить микрофон" : "Выключить микрофон"}
               >
                 {isAudioMuted ? '🎤' : '🎙️'}
               </button>
-              <button 
-                onClick={() => setIsVideoMuted(!isVideoMuted)} 
-                style={{...styles.controlBtn, backgroundColor: isVideoMuted ? '#ff4d4d' : 'rgba(255,255,255,0.2)'}}
+              <button
+                onClick={() => setIsVideoMuted(!isVideoMuted)}
+                style={{ ...styles.controlBtn, backgroundColor: isVideoMuted ? '#ff4d4d' : 'rgba(255,255,255,0.2)' }}
                 title={isVideoMuted ? "Включить камеру" : "Выключить камеру"}
               >
                 {isVideoMuted ? '❌' : '📹'}
