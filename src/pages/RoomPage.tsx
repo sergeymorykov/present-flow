@@ -21,6 +21,11 @@ export const RoomPage: React.FC = () => {
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
       { urls: 'stun:stun1.l.google.com:19302' },
+      {
+        urls: 'turn:presentation.tatcon.ru:3478',
+        username: 'present_user',
+        credential: 'present_secret_2024'
+      }
     ]
   };
 

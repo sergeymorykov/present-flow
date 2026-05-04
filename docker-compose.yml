@@ -61,3 +61,14 @@ services:
         reservations:
           cpus: '0.1'
           memory: 32M
+
+  coturn:
+    image: coturn/coturn
+    container_name: coturn
+    restart: always
+    network_mode: host
+    volumes:
+      - ./coturn/turnserver.conf:/etc/coturn/turnserver.conf:ro
+    command:
+      - -c
+      - /etc/coturn/turnserver.conf
