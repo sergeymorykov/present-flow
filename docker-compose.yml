@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        VITE_CPP_COMPILER_URL: ${VITE_CPP_COMPILER_URL:?VITE_CPP_COMPILER_URL is required in .env}
+        VITE_CPP_COMPILER_URL: ${VITE_CPP_COMPILER_URL}
     container_name: present-flow
     image: present-flow:${VERSION:-latest}
     environment:
@@ -12,22 +12,24 @@ services:
     ports:
       - "5000:5000"
     restart: unless-stopped
+    depends_on:
+      - signaling-server
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "3"
-    healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:5000/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
-        reservations:
-          cpus: '0.25'
-          memory: 128M
+
+  signaling-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.signaling
+    container_name: signaling-server
+    environment:
+      PORT: 8089
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

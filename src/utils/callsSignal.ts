@@ -32,8 +32,13 @@ class CallsSignal {
 
   private connect() {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    // Используем порт 8089 для сигналинга
-    const wsUrl = `${protocol}//${window.location.hostname}:8089`;
+    
+    // В продакшене (через Nginx) используем путь /ws/ на том же хосте/порту
+    // В разработке используем прямой порт 8089
+    const isProd = import.meta.env.PROD;
+    const wsUrl = isProd 
+      ? `${protocol}//${window.location.host}/ws/`
+      : `${protocol}//${window.location.hostname}:8089`;
     
     try {
       console.log('Connecting to:', wsUrl);
