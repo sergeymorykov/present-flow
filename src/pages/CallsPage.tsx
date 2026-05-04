@@ -25,7 +25,7 @@ export const CallsPage: React.FC = () => {
       
       if (msg.type === 'ROOMS_LIST') {
         setRooms(msg.rooms);
-      } else if (msg.type === 'ROOM_CREATED' || msg.type === 'ROOM_UPDATED') {
+      } else if (msg.type === 'ROOM_UPDATED') {
         setRooms(prev => {
           const filtered = prev.filter(r => r.id !== msg.room.id);
           return [...filtered, msg.room];
@@ -49,7 +49,14 @@ export const CallsPage: React.FC = () => {
     }
 
     const roomId = callsSignal.generateId();
-    callsSignal.send({ type: 'CREATE_ROOM', roomId, name: newRoomName, senderId: myId });
+    callsSignal.send({ 
+      type: 'CREATE_ROOM', 
+      roomId, 
+      name: newRoomName, 
+      senderId: myId,
+      hasPassword: usePassword,
+      password: usePassword ? password : undefined
+    });
     navigate(`/calls/${roomId}`);
   };
 
@@ -59,15 +66,16 @@ export const CallsPage: React.FC = () => {
       return;
     }
 
+    let p = undefined;
     if (room.hasPassword) {
-      const p = enteredPasswords[room.id] || '';
-      if (p !== room.password) {
-        alert('Неверный пароль.');
+      p = enteredPasswords[room.id] || '';
+      if (!p) {
+        alert('Введите пароль для входа.');
         return;
       }
     }
 
-    navigate(`/calls/${room.id}`);
+    navigate(`/calls/${room.id}`, { state: { password: p } });
   };
 
   return (

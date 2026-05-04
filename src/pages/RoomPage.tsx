@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { callsSignal, RoomInfo } from '../utils/callsSignal';
 
 export const RoomPage: React.FC = () => {
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const myId = useRef(callsSignal.getMyId()).current;
 
   const [room, setRoom] = useState<RoomInfo | null>(null);
@@ -92,6 +93,10 @@ export const RoomPage: React.FC = () => {
         alert('Комната была удалена.');
         navigate('/calls');
       }
+      if (msg.type === 'ERROR') {
+        alert(`Ошибка: ${msg.message}`);
+        navigate('/calls');
+      }
       if (msg.type === 'SIGNAL' && msg.roomId === roomId) {
         const { senderId, targetId, data } = msg;
         if (targetId && targetId !== myId) return;
@@ -114,8 +119,9 @@ export const RoomPage: React.FC = () => {
       }
     });
 
-    // Сообщаем серверу, что мы вошли
-    callsSignal.joinRoom(roomId);
+    // Сообщаем серверу, что мы вошли, передаем пароль если есть
+    const password = location.state?.password;
+    callsSignal.joinRoom(roomId, password);
     callsSignal.send({ type: 'QUERY_ROOMS' });
 
     return () => {

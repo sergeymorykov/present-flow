@@ -53,16 +53,24 @@ wss.on('connection', (ws) => {
 });
 
 function handleJoin(ws, data) {
-  const { roomId, senderId, name } = data;
+  const { roomId, senderId, name, hasPassword, password } = data;
   let room = rooms.find(r => r.id === roomId);
 
   if (!room) {
     room = {
       id: roomId,
       name: name || `Room ${roomId}`,
-      participants: new Set()
+      participants: new Set(),
+      hasPassword: hasPassword || false,
+      password: password || null
     };
     rooms.push(room);
+  } else if (data.type === 'JOIN' && room.hasPassword) {
+    // Проверка пароля при входе в комнату с паролем
+    if (room.password && password !== room.password) {
+      ws.send(JSON.stringify({ type: 'ERROR', message: 'Неверный пароль' }));
+      return;
+    }
   }
 
   // Если был запущен таймер удаления комнаты - отменяем его
@@ -128,7 +136,13 @@ function handleLeave(ws) {
 }
 
 function getCleanRooms() {
-  return rooms.map(r => ({ id: r.id, name: r.name, participants: r.participants.size }));
+  // Возвращаем hasPassword, но НЕ сам пароль
+  return rooms.map(r => ({ 
+    id: r.id, 
+    name: r.name, 
+    participants: r.participants.size,
+    hasPassword: r.hasPassword || false
+  }));
 }
 
 function broadcastRoomUpdate(room) {

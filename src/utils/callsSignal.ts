@@ -5,17 +5,19 @@
 export interface RoomInfo {
   id: string;
   name: string;
-  participants: number;   // Поле от сервера
+  participants: number;
+  hasPassword?: boolean;
 }
 
 export type SignalMessage =
   | { type: 'QUERY_ROOMS' }
-  | { type: 'CREATE_ROOM'; roomId: string; name: string; senderId: string }
-  | { type: 'JOIN'; roomId: string; senderId: string }
+  | { type: 'CREATE_ROOM'; roomId: string; name: string; senderId: string; hasPassword?: boolean; password?: string }
+  | { type: 'JOIN'; roomId: string; senderId: string; password?: string }
   | { type: 'LEAVE'; roomId: string; senderId: string }
   | { type: 'ROOMS_LIST'; rooms: RoomInfo[] }
   | { type: 'ROOM_UPDATED'; room: RoomInfo }
   | { type: 'ROOM_DELETED'; roomId: string }
+  | { type: 'ERROR'; message: string }
   | { type: 'SIGNAL'; roomId: string; senderId: string; targetId?: string; data: any };
 
 class CallsSignal {
@@ -106,9 +108,9 @@ class CallsSignal {
   }
 
   // Вызывается из RoomPage при входе в комнату
-  joinRoom(roomId: string) {
+  joinRoom(roomId: string, password?: string) {
     this.currentRoomId = roomId;
-    this.send({ type: 'JOIN', roomId, senderId: this.myId });
+    this.send({ type: 'JOIN', roomId, senderId: this.myId, password });
   }
 
   // Вызывается из RoomPage при выходе из комнаты
