@@ -18,6 +18,8 @@ services:
     ports:
       - "5000:5000"
     restart: unless-stopped
+    depends_on:
+      - signaling-server
     logging:
       driver: json-file
       options:
@@ -32,8 +34,30 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: 256M
-        reservations:
-          cpus: '0.25'
+          cpus: '0.4'
           memory: 128M
+        reservations:
+          cpus: '0.2'
+          memory: 64M
+
+  signaling-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.signaling
+    container_name: signaling-server
+    environment:
+      PORT: 8089
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "2m"
+        max-file: "2"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 64M
+        reservations:
+          cpus: '0.1'
+          memory: 32M
