@@ -8,7 +8,8 @@
     "docs:syntax": "node scripts/generate-syntax-wiki.cjs",
     "docs:syntax:check": "node scripts/check-syntax-wiki.cjs",
     "docs:syntax:integrity": "node scripts/check-syntax-integrity.cjs",
-    "docs:syntax:verify": "npm run docs:syntax:check && npm run docs:syntax:integrity"
+    "docs:syntax:verify": "npm run docs:syntax:check && npm run docs:syntax:integrity",
+    "signaling": "node server/signaling.js"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
@@ -21,7 +22,8 @@
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
-    "reveal.js": "^5.2.1"
+    "reveal.js": "^5.2.1",
+    "ws": "^8.20.0"
   },
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.12.1",

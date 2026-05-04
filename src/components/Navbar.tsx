@@ -17,6 +17,12 @@ export const Navbar: React.FC = () => {
         {!isPresentationMode && (
           <div style={styles.menu}>
             <Link
+              to="/calls"
+              style={{ ...styles.link, ...(location.pathname === '/calls' ? styles.linkActive : {}) }}
+            >
+              Звонки
+            </Link>
+            <Link
               to="/editor"
               style={{ ...styles.link, ...(isEditor ? styles.linkActive : {}) }}
             >

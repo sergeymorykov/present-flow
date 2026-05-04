@@ -15,6 +15,14 @@ const EditorPageLazy = lazy(() =>
   import('./pages/EditorPage').then((m) => ({ default: m.EditorPage }))
 );
 
+const CallsPageLazy = lazy(() =>
+  import('./pages/CallsPage').then((m) => ({ default: m.CallsPage }))
+);
+
+const RoomPageLazy = lazy(() =>
+  import('./pages/RoomPage').then((m) => ({ default: m.RoomPage }))
+);
+
 const styles: { [key: string]: React.CSSProperties } = {
   app: {
     minHeight: '100vh',
@@ -129,6 +137,22 @@ const router = createBrowserRouter([
         ),
       },
       { path: '/presentation/:id', element: <PresentationRoute /> },
+      {
+        path: '/calls',
+        element: (
+          <Suspense fallback={<div style={styles.loader}>Загрузка звонков...</div>}>
+            <CallsPageLazy />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/calls/:roomId',
+        element: (
+          <Suspense fallback={<div style={styles.loader}>Вход в комнату...</div>}>
+            <RoomPageLazy />
+          </Suspense>
+        ),
+      },
       { path: '*', element: <Navigate to="/" replace /> },
     ],
   },
