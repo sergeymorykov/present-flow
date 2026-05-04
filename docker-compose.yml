@@ -11,8 +11,8 @@ services:
     image: present-flow:${VERSION:-latest}
     init: true
     tmpfs:
-      - /var/cache/nginx:size=32m
-      - /tmp:size=8m
+      - /var/cache/nginx:size=32m,uid=101,gid=101
+      - /tmp:size=8m,uid=101,gid=101
     environment:
       PORT: 5000
     ports:
