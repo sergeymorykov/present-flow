@@ -8,85 +8,96 @@ const clientRooms = new Map(); // ws -> roomId
 
 console.log(`Signaling server started on port ${port}`);
 
-wss.on('connection', (ws) => {
-  ws.on('message', (data) => {
-    try {
-      const message = JSON.parse(data);
+// Механизм Keep-alive (Heartbeat)
+const interval = setInterval(() => {
+  wss.clients.forEach((ws) => {
+    if (ws.isAlive === false) {
+      console.log('Client not responding, terminating...');
+      return ws.terminate();
+    }
+    ws.isAlive = false;
+    ws.ping();
+  });
+}, 30000);
 
-      switch (message.type) {
+wss.on('connection', (ws) => {
+  ws.isAlive = true;
+  ws.on('pong', () => {
+    ws.isAlive = true;
+  });
+
+  ws.on('message', (message) => {
+    try {
+      const data = JSON.parse(message);
+      // console.log('Received:', data.type, 'from', ws._socket.remoteAddress);
+
+      switch (data.type) {
         case 'QUERY_ROOMS':
           ws.send(JSON.stringify({ type: 'ROOMS_LIST', rooms }));
           break;
 
-        case 'ROOM_CREATED':
-          // При создании комнаты устанавливаем начальное кол-во 0 (оно увеличится при JOIN)
-          const newRoom = { ...message.room, participantsCount: 0 };
+        case 'CREATE_ROOM':
+          const newRoom = {
+            id: data.roomId,
+            name: data.name,
+            participants: 1
+          };
           rooms.push(newRoom);
-          broadcast(message);
+          clientRooms.set(ws, data.roomId);
+          broadcast({ type: 'ROOMS_LIST', rooms });
           break;
 
-        case 'ROOM_DELETED':
-          rooms = rooms.filter(r => r.id !== message.roomId);
-          broadcast(message);
+        case 'JOIN':
+          const roomToJoin = rooms.find(r => r.id === data.roomId);
+          if (roomToJoin) {
+            roomToJoin.participants++;
+            clientRooms.set(ws, data.roomId);
+            broadcast({ type: 'ROOM_UPDATED', room: roomToJoin });
+            broadcast({ type: 'SIGNAL', roomId: data.roomId, senderId: 'server', data: { type: 'JOIN', senderId: data.senderId } });
+          }
           break;
 
         case 'SIGNAL':
-          if (message.data && message.data.type === 'JOIN') {
-            clientRooms.set(ws, message.roomId);
-            updateParticipantCount(message.roomId, 1);
-          }
-          if (message.data && message.data.type === 'LEAVE') {
-            handleDisconnect(ws);
-          }
-          broadcast(ws, message);
-          break;
-
-        default:
-          broadcast(ws, message);
+          // Пробрасываем сигнал другим участникам в той же комнате
+          wss.clients.forEach(client => {
+            if (client !== ws && client.readyState === 1) {
+              client.send(JSON.stringify(data));
+            }
+          });
           break;
       }
     } catch (e) {
-      console.error('Error processing message:', e);
+      console.error('Error handling message:', e);
     }
   });
 
   ws.on('close', () => {
-    handleDisconnect(ws);
+    const roomId = clientRooms.get(ws);
+    if (roomId) {
+      const room = rooms.find(r => r.id === roomId);
+      if (room) {
+        room.participants--;
+        if (room.participants <= 0) {
+          rooms = rooms.filter(r => r.id !== roomId);
+          broadcast({ type: 'ROOMS_LIST', rooms });
+        } else {
+          broadcast({ type: 'ROOM_UPDATED', room });
+        }
+      }
+      clientRooms.delete(ws);
+    }
   });
 });
 
-function updateParticipantCount(roomId, delta) {
-  const room = rooms.find(r => r.id === roomId);
-  if (room) {
-    room.participantsCount = Math.max(0, room.participantsCount + delta);
-    console.log(`Room ${roomId} participants: ${room.participantsCount}`);
-    
-    if (room.participantsCount <= 0) {
-      rooms = rooms.filter(r => r.id !== roomId);
-      broadcast({ type: 'ROOM_DELETED', roomId });
-    } else {
-      broadcast({ type: 'ROOM_UPDATED', room });
-    }
-  }
-}
+wss.on('close', () => {
+  clearInterval(interval);
+});
 
-function handleDisconnect(ws) {
-  const roomId = clientRooms.get(ws);
-  if (roomId) {
-    clientRooms.delete(ws);
-    updateParticipantCount(roomId, -1);
-  }
-}
-
-function broadcast(sender, message) {
-  if (!message) {
-    message = sender;
-    sender = null;
-  }
-  const payload = JSON.stringify(message);
-  wss.clients.forEach((client) => {
-    if (client !== sender && client.readyState === 1) {
-      client.send(payload);
+function broadcast(data) {
+  const msg = JSON.stringify(data);
+  wss.clients.forEach(client => {
+    if (client.readyState === 1) {
+      client.send(msg);
     }
   });
 }
