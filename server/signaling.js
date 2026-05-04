@@ -3,18 +3,16 @@ const { WebSocketServer } = require('ws');
 const port = process.env.PORT || 8089;
 const wss = new WebSocketServer({ port });
 
+// Храним объекты комнат: { id, name, participants: Set([userId1, userId2]) }
 let rooms = [];
-const clientRooms = new Map(); // ws -> roomId
+// Карта для быстрого поиска: ws -> { roomId, userId }
+const clients = new Map();
 
 console.log(`Signaling server started on port ${port}`);
 
-// Механизм Keep-alive (Heartbeat)
 const interval = setInterval(() => {
   wss.clients.forEach((ws) => {
-    if (ws.isAlive === false) {
-      console.log('Client not responding, terminating...');
-      return ws.terminate();
-    }
+    if (ws.isAlive === false) return ws.terminate();
     ws.isAlive = false;
     ws.ping();
   });
@@ -22,48 +20,55 @@ const interval = setInterval(() => {
 
 wss.on('connection', (ws) => {
   ws.isAlive = true;
-  ws.on('pong', () => {
-    ws.isAlive = true;
-  });
+  ws.on('pong', () => ws.isAlive = true);
 
   ws.on('message', (message) => {
     try {
       const data = JSON.parse(message);
-      // console.log('Received:', data.type, 'from', ws._socket.remoteAddress);
 
       switch (data.type) {
         case 'QUERY_ROOMS':
-          ws.send(JSON.stringify({ type: 'ROOMS_LIST', rooms }));
+          // Отправляем список комнат с количеством уникальных участников
+          const roomList = rooms.map(r => ({ id: r.id, name: r.name, participants: r.participants.size }));
+          ws.send(JSON.stringify({ type: 'ROOMS_LIST', rooms: roomList }));
           break;
 
         case 'CREATE_ROOM':
-          const newRoom = {
-            id: data.roomId,
-            name: data.name,
-            participants: 1
-          };
-          rooms.push(newRoom);
-          clientRooms.set(ws, data.roomId);
-          broadcast({ type: 'ROOMS_LIST', rooms });
+          // Если комната уже есть, просто заходим в нее
+          let room = rooms.find(r => r.id === data.roomId);
+          if (!room) {
+            room = {
+              id: data.roomId,
+              name: data.name,
+              participants: new Set([data.senderId])
+            };
+            rooms.push(room);
+          } else {
+            room.participants.add(data.senderId);
+          }
+          clients.set(ws, { roomId: data.roomId, userId: data.senderId });
+          broadcastRoomUpdate(room);
           break;
 
         case 'JOIN':
-          const roomToJoin = rooms.find(r => r.id === data.roomId);
-          if (roomToJoin) {
-            roomToJoin.participants++;
-            clientRooms.set(ws, data.roomId);
-            broadcast({ type: 'ROOM_UPDATED', room: roomToJoin });
-            broadcast({ type: 'SIGNAL', roomId: data.roomId, senderId: 'server', data: { type: 'JOIN', senderId: data.senderId } });
+          const targetRoom = rooms.find(r => r.id === data.roomId);
+          if (targetRoom) {
+            targetRoom.participants.add(data.senderId);
+            clients.set(ws, { roomId: data.roomId, userId: data.senderId });
+            broadcastRoomUpdate(targetRoom);
+            // Уведомляем других о входе (для WebRTC)
+            broadcastToRoom(data.roomId, { 
+              type: 'SIGNAL', 
+              roomId: data.roomId, 
+              senderId: 'server', 
+              data: { type: 'JOIN', senderId: data.senderId } 
+            }, ws);
           }
           break;
 
         case 'SIGNAL':
-          // Пробрасываем сигнал другим участникам в той же комнате
-          wss.clients.forEach(client => {
-            if (client !== ws && client.readyState === 1) {
-              client.send(JSON.stringify(data));
-            }
-          });
+          // Пересылаем сигнал всем, кроме отправителя
+          broadcastToRoom(data.roomId, data, ws);
           break;
       }
     } catch (e) {
@@ -72,26 +77,51 @@ wss.on('connection', (ws) => {
   });
 
   ws.on('close', () => {
-    const roomId = clientRooms.get(ws);
-    if (roomId) {
+    const clientInfo = clients.get(ws);
+    if (clientInfo) {
+      const { roomId, userId } = clientInfo;
       const room = rooms.find(r => r.id === roomId);
       if (room) {
-        room.participants--;
-        if (room.participants <= 0) {
-          rooms = rooms.filter(r => r.id !== roomId);
-          broadcast({ type: 'ROOMS_LIST', rooms });
-        } else {
-          broadcast({ type: 'ROOM_UPDATED', room });
+        // Важно: мы не удаляем пользователя из Set сразу, 
+        // чтобы дать ему пару секунд на переподключение, 
+        // ИЛИ проверяем, нет ли у него другого открытого сокета.
+        
+        // Проверяем, есть ли у этого же пользователя другие активные сокеты
+        const hasOtherSockets = Array.from(clients.entries()).some(([socket, info]) => 
+          socket !== ws && socket.readyState === 1 && info.userId === userId && info.roomId === roomId
+        );
+
+        if (!hasOtherSockets) {
+          room.participants.delete(userId);
+          if (room.participants.size === 0) {
+            rooms = rooms.filter(r => r.id !== roomId);
+            broadcast({ type: 'ROOMS_LIST', rooms: rooms.map(r => ({ id: r.id, name: r.name, participants: r.participants.size })) });
+          } else {
+            broadcastRoomUpdate(room);
+          }
         }
       }
-      clientRooms.delete(ws);
+      clients.delete(ws);
     }
   });
 });
 
-wss.on('close', () => {
-  clearInterval(interval);
-});
+function broadcastRoomUpdate(room) {
+  broadcast({ 
+    type: 'ROOM_UPDATED', 
+    room: { id: room.id, name: room.name, participants: room.participants.size } 
+  });
+}
+
+function broadcastToRoom(roomId, data, excludeWs) {
+  const msg = JSON.stringify(data);
+  wss.clients.forEach(client => {
+    const info = clients.get(client);
+    if (client !== excludeWs && client.readyState === 1 && info && info.roomId === roomId) {
+      client.send(msg);
+    }
+  });
+}
 
 function broadcast(data) {
   const msg = JSON.stringify(data);
